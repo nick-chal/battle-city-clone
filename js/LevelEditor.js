@@ -95,7 +95,7 @@ var Editor = function () {
         stop = true;
         console.log(JSON.stringify(map));
         clearMap();
-        new Game().init(map);
+        new Game().init(map, false);
         tankEditor.draw(8 * 16 + PADD, 24 * 16 + PADD);
         keylog[13].handled = true;
       }

@@ -3,6 +3,7 @@ var Enemy = function () {
   this.change = 'down';
   this.tankDestroyed = false;
   var generationSpot = randomGenerator(1, 3);
+  var startAnimationCounter = 0;
   switch (generationSpot) {
     case 1:
       this.tankPosition = [0, 0];
@@ -15,27 +16,31 @@ var Enemy = function () {
       break;
   }
 
-  this.bulletFired = false;
+  this.bulletFired = true;
   this.tankSpeed = 1;
   var that = this;
 
   this.drawTank = function () {
     var currTankImage = null;
-    switch (this.direction) {
-      case 'up':
-        currTankImage = enemyUp;
-        break;
-      case 'down':
-        currTankImage = enemyDown;
-        break;
-      case 'right':
-        currTankImage = enemyRight;
-        break;
-      case 'left':
-        currTankImage = enemyLeft;
-        break;
+    if (startAnimationCounter < 120) {
+      creation.drawAnimated(this.tankPosition[0] + PADD, this.tankPosition[1] + PADD, [0, 1, 2, 3, 4, 5])
+    } else {
+      switch (this.direction) {
+        case 'up':
+          currTankImage = enemyUp;
+          break;
+        case 'down':
+          currTankImage = enemyDown;
+          break;
+        case 'right':
+          currTankImage = enemyRight;
+          break;
+        case 'left':
+          currTankImage = enemyLeft;
+          break;
+      }
+      currTankImage.drawAnimated(this.tankPosition[0] + PADD, this.tankPosition[1] + PADD, [0, 1]);
     }
-    currTankImage.drawAnimated(this.tankPosition[0] + PADD, this.tankPosition[1] + PADD, [0, 1]);
   }
 
   this.checkBulletFired = function () {
@@ -50,189 +55,194 @@ var Enemy = function () {
     var wallCheck1 = [];
     var wallCheck2 = [];
     var tankCollision = false;
-    for (var i = 0; i < enemyList.length; i++) {
-      if (index !== i) {
-        tankCollision = this.tankTankCollision(enemyList[i].tankPosition);
-      }
-      if (tankCollision) break;
-      if (i == enemyList.length - 1 && !tankCollision && player !== null) {
-        tankCollision = this.tankTankCollision(player.tankPosition);
-      }
-    }
-    if (this.change == 'up') {
-      if (tankCollision && this.direction == 'up') {
-        this.change = 'up';
-      }
-      if (this.direction == 'right' || this.direction == 'left') {
-        this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
-      }
-      wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
-      wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
-
-      if (this.tankPosition[1] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-        this.direction = this.change;
-        this.tankPosition[1] -= this.tankSpeed;
-        switch (randomGenerator(1, 200)) {
-          case 1:
-            this.change = 'down';
-            break;
-          case 2:
-            this.change = 'right';
-            break;
-          case 3:
-            this.change = 'left';
-            break;
-          default:
-            this.change = this.direction;
+    if (startAnimationCounter < 120) {
+      startAnimationCounter++;
+      if (startAnimationCounter >= 120) this.bulletFired = false;
+    } else {
+      for (var i = 0; i < enemyList.length; i++) {
+        if (index !== i) {
+          tankCollision = this.tankTankCollision(enemyList[i].tankPosition);
         }
-      } else {
-        switch (randomGenerator(1, 10)) {
-          case 1:
-            this.change = 'down';
-            break;
-          case 2:
-            this.change = 'right';
-            break;
-          case 3:
-            this.change = 'left';
-            break;
-          default:
-            this.change = this.direction;
-
+        if (tankCollision) break;
+        if (i == enemyList.length - 1 && !tankCollision && player !== null) {
+          tankCollision = this.tankTankCollision(player.tankPosition);
         }
       }
-      this.direction = 'up';
-
-    } else if (this.change == 'down') {
-      if (tankCollision && this.direction == 'down') {
-        this.change = 'down';
-      }
-      if (this.direction == 'right' || this.direction == 'left') {
-        this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
-      }
-      wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16) + 2)];
-      wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
-
-      if (this.tankPosition[1] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-        this.direction = this.change;
-        this.tankPosition[1] += this.tankSpeed;
-        switch (randomGenerator(1, 200)) {
-          case 1:
-            this.change = 'up';
-            break;
-          case 2:
-            this.change = 'right';
-            break;
-          case 3:
-            this.change = 'left';
-            break;
-          default:
-            this.change = this.direction;
+      if (this.change == 'up') {
+        if (tankCollision && this.direction == 'up') {
+          this.change = 'up';
         }
-      } else {
-        switch (randomGenerator(1, 10)) {
-          case 1:
-            this.change = 'up';
-            break;
-          case 2:
-            this.change = 'right';
-            break;
-          case 3:
-            this.change = 'left';
-            break;
-          default:
-            this.change = this.direction;
-
+        if (this.direction == 'right' || this.direction == 'left') {
+          this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
         }
-      }
-      this.direction = 'down';
+        wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
+        wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
 
-    } else if (this.change == 'right') {
-      if (tankCollision && this.direction == 'right') {
-        this.change = 'left';
-      }
-      if (this.direction == 'up' || this.direction == 'down') {
-        this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
-      }
-      wallCheck1 = [(Math.floor(this.tankPosition[0] / 16) + 2), (Math.floor(this.tankPosition[1] / 16))];
-      wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
+        if (this.tankPosition[1] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+          this.direction = this.change;
+          this.tankPosition[1] -= this.tankSpeed;
+          switch (randomGenerator(1, 200)) {
+            case 1:
+              this.change = 'down';
+              break;
+            case 2:
+              this.change = 'right';
+              break;
+            case 3:
+              this.change = 'left';
+              break;
+            default:
+              this.change = this.direction;
+          }
+        } else {
+          switch (randomGenerator(1, 10)) {
+            case 1:
+              this.change = 'down';
+              break;
+            case 2:
+              this.change = 'right';
+              break;
+            case 3:
+              this.change = 'left';
+              break;
+            default:
+              this.change = this.direction;
 
-      if (this.tankPosition[0] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-        this.direction = this.change;
-        this.tankPosition[0] += this.tankSpeed;
-        switch (randomGenerator(1, 200)) {
-          case 1:
-            this.change = 'down';
-            break;
-          case 2:
-            this.change = 'up';
-            break;
-          case 3:
-            this.change = 'left';
-            break;
-          default:
-            this.change = this.direction;
+          }
         }
-      } else {
-        switch (randomGenerator(1, 10)) {
-          case 1:
-            this.change = 'down';
-            break;
-          case 2:
-            this.change = 'up';
-            break;
-          case 3:
-            this.change = 'left';
-            break;
-          default:
-            this.change = this.direction;
+        this.direction = 'up';
 
+      } else if (this.change == 'down') {
+        if (tankCollision && this.direction == 'down') {
+          this.change = 'down';
         }
-      }
-      this.direction = 'right';
+        if (this.direction == 'right' || this.direction == 'left') {
+          this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
+        }
+        wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16) + 2)];
+        wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
 
-    } else if (this.change == 'left') {
-      if (tankCollision && this.direction == 'left') {
-        this.change = 'right';
-      }
-      if (this.direction == 'up' || this.direction == 'down') {
-        this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
-      }
-      wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
-      wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
-      if (this.tankPosition[0] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-        this.direction = this.change;
-        this.tankPosition[0] -= this.tankSpeed;
-        switch (randomGenerator(1, 200)) {
-          case 1:
-            this.change = 'down';
-            break;
-          case 2:
-            this.change = 'right';
-            break;
-          case 3:
-            this.change = 'up';
-            break;
-          default:
-            this.change = this.direction;
-        }
-      } else {
-        switch (randomGenerator(1, 10)) {
-          case 1:
-            this.change = 'down';
-            break;
-          case 2:
-            this.change = 'right';
-            break;
-          case 3:
-            this.change = 'up';
-            break;
-          default:
-            this.change = this.direction;
+        if (this.tankPosition[1] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+          this.direction = this.change;
+          this.tankPosition[1] += this.tankSpeed;
+          switch (randomGenerator(1, 200)) {
+            case 1:
+              this.change = 'up';
+              break;
+            case 2:
+              this.change = 'right';
+              break;
+            case 3:
+              this.change = 'left';
+              break;
+            default:
+              this.change = this.direction;
+          }
+        } else {
+          switch (randomGenerator(1, 10)) {
+            case 1:
+              this.change = 'up';
+              break;
+            case 2:
+              this.change = 'right';
+              break;
+            case 3:
+              this.change = 'left';
+              break;
+            default:
+              this.change = this.direction;
 
+          }
         }
+        this.direction = 'down';
+
+      } else if (this.change == 'right') {
+        if (tankCollision && this.direction == 'right') {
+          this.change = 'left';
+        }
+        if (this.direction == 'up' || this.direction == 'down') {
+          this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
+        }
+        wallCheck1 = [(Math.floor(this.tankPosition[0] / 16) + 2), (Math.floor(this.tankPosition[1] / 16))];
+        wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
+
+        if (this.tankPosition[0] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+          this.direction = this.change;
+          this.tankPosition[0] += this.tankSpeed;
+          switch (randomGenerator(1, 200)) {
+            case 1:
+              this.change = 'down';
+              break;
+            case 2:
+              this.change = 'up';
+              break;
+            case 3:
+              this.change = 'left';
+              break;
+            default:
+              this.change = this.direction;
+          }
+        } else {
+          switch (randomGenerator(1, 10)) {
+            case 1:
+              this.change = 'down';
+              break;
+            case 2:
+              this.change = 'up';
+              break;
+            case 3:
+              this.change = 'left';
+              break;
+            default:
+              this.change = this.direction;
+
+          }
+        }
+        this.direction = 'right';
+
+      } else if (this.change == 'left') {
+        if (tankCollision && this.direction == 'left') {
+          this.change = 'right';
+        }
+        if (this.direction == 'up' || this.direction == 'down') {
+          this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
+        }
+        wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
+        wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
+        if (this.tankPosition[0] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+          this.direction = this.change;
+          this.tankPosition[0] -= this.tankSpeed;
+          switch (randomGenerator(1, 200)) {
+            case 1:
+              this.change = 'down';
+              break;
+            case 2:
+              this.change = 'right';
+              break;
+            case 3:
+              this.change = 'up';
+              break;
+            default:
+              this.change = this.direction;
+          }
+        } else {
+          switch (randomGenerator(1, 10)) {
+            case 1:
+              this.change = 'down';
+              break;
+            case 2:
+              this.change = 'right';
+              break;
+            case 3:
+              this.change = 'up';
+              break;
+            default:
+              this.change = this.direction;
+
+          }
+        }
+        this.direction = 'left';
       }
-      this.direction = 'left';
     }
   }
 

@@ -1,6 +1,7 @@
 var Bullet = function (direction, position, owner) {
   this.direction = direction;
   this.bulletPosition = position;
+  var owner = owner;
   switch (owner) {
     case 0:
       this.speed = 4;
@@ -42,6 +43,10 @@ var Bullet = function (direction, position, owner) {
   }
 
   var updateMap = function (map, wall1, wall2) {
+    if (owner === 0) {
+      if (map[wall1[1]][wall1[0]] == 1 || map[wall2[1]][wall2[0]] == 1) sound.bulletBrick.play();
+      else if (map[wall1[1]][wall1[0]] == 2 || map[wall2[1]][wall2[0]] == 2) sound.bulletWall.play();
+    }
     switch (map[wall1[1]][wall1[0]]) {
       case 1:
         map[wall1[1]][wall1[0]] = 0;
@@ -73,6 +78,9 @@ var Bullet = function (direction, position, owner) {
             this.destroyed = true;
           }
         } else {
+          if (owner == 0) {
+            sound.bulletWall.play();
+          }
           this.destroyed = true;
         }
         break;
@@ -87,6 +95,9 @@ var Bullet = function (direction, position, owner) {
             this.destroyed = true;
           }
         } else {
+          if (owner == 0) {
+            sound.bulletWall.play();
+          }
           this.destroyed = true;
         }
         break;
@@ -101,6 +112,9 @@ var Bullet = function (direction, position, owner) {
             this.destroyed = true;
           }
         } else {
+          if (owner == 0) {
+            sound.bulletWall.play();
+          }
           this.destroyed = true;
         }
         break;
@@ -115,6 +129,9 @@ var Bullet = function (direction, position, owner) {
             this.destroyed = true;
           }
         } else {
+          if (owner == 0) {
+            sound.bulletWall.play();
+          }
           this.destroyed = true;
         }
         break;

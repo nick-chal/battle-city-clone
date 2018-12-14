@@ -29,6 +29,13 @@ var tankLeft = new Sprite('assets/images/tank_left.png', 32, 32);
 var tankDown = new Sprite('assets/images/tank_down.png', 32, 32);
 var tankUp = new Sprite('assets/images/tank_up.png', 32, 32);
 
+var tank2Right = new Sprite('assets/images/tank_player2_right.png', 32, 32);
+var tank2Left = new Sprite('assets/images/tank_player2_left.png', 32, 32);
+var tank2Down = new Sprite('assets/images/tank_player2_down.png', 32, 32);
+var tank2Up = new Sprite('assets/images/tank_player2_up.png', 32, 32);
+
+var creation = new Sprite('assets/images/create_sprite.png', 32, 32);
+
 var enemyUp = new Sprite('assets/images/enemy_up_1.png', 32, 32);
 var enemyDown = new Sprite('assets/images/enemy_down_1.png', 32, 32);
 var enemyRight = new Sprite('assets/images/enemy_right_1.png', 32, 32);
@@ -42,7 +49,15 @@ var bulletUp = new Sprite('assets/images/bullet_up.png', 8, 8);
 var battleCity = new Sprite('assets/images/battle_city.png', 376, 136);
 var gameOver = new Sprite('assets/images/game_over.png', 248, 160);
 
-var editor = new Editor();
+var sound = {
+  bullet: new Audio('assets/sound/bullet_shot.ogg'),
+  start: new Audio('assets/sound/stage_start.ogg'),
+  over: new Audio('assets/sound/game_over.ogg'),
+  bulletWall: new Audio('assets/sound/bullet_hit_1.ogg'),
+  bulletBrick: new Audio('assets/sound/bullet_hit_2.ogg'),
+  explosionTank: new Audio('assets/sound/explosion_1.ogg'),
+  explosionBase: new Audio('assets/sound/explosion_2.ogg')
+}
 
 document.addEventListener('keydown', function (e) {
   keylog[e.keyCode] = {
@@ -112,13 +127,17 @@ var landingView = function (tankPosition) {
       if (tankPosition === 350 && !keylog[13].handled) {
         cancelAnimationFrame(landingAnimation);
         canvas.context.clearRect(0, 0, 500, 500);
-        editor.init();
+        new Editor().init();
+        stop = true;
+      } else if (tankPosition === 300 && !keylog[13].handled) {
+        canvas.context.clearRect(0, 0, 500, 500);
+        var mapLoad = map2.slice();
+        new Game().init(mapLoad, true);
         stop = true;
       } else if (tankPosition === 250 && !keylog[13].handled) {
         canvas.context.clearRect(0, 0, 500, 500);
         var mapLoad = map2.slice();
-        console.log(mapLoad);
-        new Game().init(mapLoad);
+        new Game().init(mapLoad, false);
         stop = true;
       }
       keylog[13].handled = true;
