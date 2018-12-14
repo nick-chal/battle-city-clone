@@ -34,10 +34,18 @@ var Player = function () {
     return false;
   }
 
-  this.updateTank = function (map) {
+  this.updateTank = function (map, enemyList) {
     var wallCheck1 = [];
     var wallCheck2 = [];
+    var tankCollision = false;
+    for (var i = 0; i < enemyList.length; i++) {
+      tankCollision = this.tankTankCollision(enemyList[i].tankPosition);
+      if (tankCollision)
+        break;
+    }
+
     if (!keylog[38].handled && keylog[38].pressed) {
+      if (tankCollision && this.direction == 'up') return;
       if (this.direction == 'right' || this.direction == 'left') {
         this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
       }
@@ -50,6 +58,7 @@ var Player = function () {
       this.direction = 'up';
 
     } else if (!keylog[40].handled && keylog[40].pressed) {
+      if (tankCollision && this.direction == 'down') return;
       if (this.direction == 'right' || this.direction == 'left') {
         this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
       }
@@ -62,6 +71,7 @@ var Player = function () {
       this.direction = 'down';
 
     } else if (!keylog[39].handled && keylog[39].pressed) {
+      if (tankCollision && this.direction == 'right') return;
       if (this.direction == 'up' || this.direction == 'down') {
         this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
       }
@@ -74,6 +84,7 @@ var Player = function () {
       this.direction = 'right';
 
     } else if (!keylog[37].handled && keylog[37].pressed) {
+      if (tankCollision && this.direction == 'left') return;
       if (this.direction == 'up' || this.direction == 'down') {
         this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
       }
@@ -84,6 +95,13 @@ var Player = function () {
       }
       this.direction = 'left';
     }
+  }
+
+  this.tankTankCollision = function (position) {
+    if (this.tankPosition[0] <= position[0] + 32 && this.tankPosition[0] + 32 >= position[0] && this.tankPosition[1] <= position[1] + 32 && this.tankPosition[1] + 32 >= position[1]) {
+      return true;
+    }
+    return false;
   }
 
   this.collisionDetection = function (map, wall1, wall2) {

@@ -40,6 +40,7 @@ var bulletDown = new Sprite('assets/images/bullet_down.png', 8, 8);
 var bulletUp = new Sprite('assets/images/bullet_up.png', 8, 8);
 
 var battleCity = new Sprite('assets/images/battle_city.png', 376, 136);
+var gameOver = new Sprite('assets/images/game_over.png', 248, 160);
 
 var editor = new Editor();
 
@@ -115,7 +116,9 @@ var landingView = function (tankPosition) {
         stop = true;
       } else if (tankPosition === 250 && !keylog[13].handled) {
         canvas.context.clearRect(0, 0, 500, 500);
-        new Game().init(map2);
+        var mapLoad = map2.slice();
+        console.log(mapLoad);
+        new Game().init(mapLoad);
         stop = true;
       }
       keylog[13].handled = true;
