@@ -1,0 +1,16 @@
+@font-face {
+  font-family: prstart;
+  src: url('../assets/fonts/prstart.ttf');
+}
+
+#canvas {
+  height: 500px;
+  width: 500px;
+  background: black;
+}
+
+div {
+  margin: 25px auto;
+  width: 500px;
+  font-family: prstart;
+}
