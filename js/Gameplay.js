@@ -137,8 +137,6 @@ var Game = function () {
         if (secondPlayer) {
           if (enemyBullet[i]) {
             if (!enemyBullet[i].destroyed) {
-              enemyBullet[i].drawBullet();
-              enemyBullet[i].updateBullet(map);
               if (player2 != null && enemyBullet[i].tankDetection(player2)) {
                 player2 = null;
               }
