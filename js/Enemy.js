@@ -3,7 +3,7 @@ var Enemy = function () {
   this.change = 'down';
   this.tankDestroyed = false;
   var generationSpot = randomGenerator(1, 3);
-  var startAnimationCounter = 0;
+  this.startAnimationCounter = 0;
   switch (generationSpot) {
     case 1:
       this.tankPosition = [0, 0];
@@ -22,7 +22,7 @@ var Enemy = function () {
 
   this.drawTank = function () {
     var currTankImage = null;
-    if (startAnimationCounter < 120) {
+    if (this.startAnimationCounter < 120) {
       creation.drawAnimated(this.tankPosition[0] + PADD, this.tankPosition[1] + PADD, [0, 1, 2, 3, 4, 5])
     } else {
       switch (this.direction) {
@@ -55,9 +55,9 @@ var Enemy = function () {
     var wallCheck1 = [];
     var wallCheck2 = [];
     var tankCollision = false;
-    if (startAnimationCounter < 120) {
-      startAnimationCounter++;
-      if (startAnimationCounter >= 120) this.bulletFired = false;
+    if (this.startAnimationCounter < 120) {
+      this.startAnimationCounter++;
+      if (this.startAnimationCounter >= 120) this.bulletFired = false;
     } else {
       for (var i = 0; i < enemyList.length; i++) {
         if (index !== i) {

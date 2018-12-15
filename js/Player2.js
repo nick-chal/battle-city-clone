@@ -2,30 +2,34 @@ var Player2 = function () {
   this.direction = 'up';
   this.tankPosition = [16 * 16, 24 * 16];
   this.bulletFired = false;
+  this.startAnimationCounter = 0
   var that = this;
 
   this.drawTank = function () {
     var currTankImage = null;
-    switch (this.direction) {
-      case 'up':
-        currTankImage = tank2Up;
-        break;
-      case 'down':
-        currTankImage = tank2Down;
-        break;
-      case 'right':
-        currTankImage = tank2Right;
-        break;
-      case 'left':
-        currTankImage = tank2Left;
-        break;
+    if (this.startAnimationCounter < 120) {
+      creation.drawAnimated(this.tankPosition[0] + PADD, this.tankPosition[1] + PADD, [0, 1, 2, 3, 4, 5])
+    } else {
+      switch (this.direction) {
+        case 'up':
+          currTankImage = tank2Up;
+          break;
+        case 'down':
+          currTankImage = tank2Down;
+          break;
+        case 'right':
+          currTankImage = tank2Right;
+          break;
+        case 'left':
+          currTankImage = tank2Left;
+          break;
+      }
+      currTankImage.drawMoving(this.tankPosition[0] + PADD, this.tankPosition[1] + PADD, [0, 1]);
     }
-    console.log(currTankImage);
-    currTankImage.drawMoving(this.tankPosition[0] + PADD, this.tankPosition[1] + PADD, [0, 1]);
   }
 
   this.checkBulletFired = function () {
-    if (keylog[16].pressed && !keylog[16].handled && this.bulletFired == false) {
+    if (keylog[70].pressed && !keylog[70].handled && this.bulletFired == false) {
       this.bulletFired = true;
       keylog[16].handled = true;
       return true;
@@ -37,62 +41,68 @@ var Player2 = function () {
     var wallCheck1 = [];
     var wallCheck2 = [];
     var tankCollision = false;
-    for (var i = 0; i < enemyList.length; i++) {
-      tankCollision = this.tankTankCollision(enemyList[i].tankPosition);
-      if (tankCollision)
-        break;
-    }
+    if (this.startAnimationCounter < 120) {
+      this.startAnimationCounter++;
+      this.bulletFired = true;
+      if (this.startAnimationCounter >= 120) this.bulletFired = false;
+    } else {
+      for (var i = 0; i < enemyList.length; i++) {
+        tankCollision = this.tankTankCollision(enemyList[i].tankPosition);
+        if (tankCollision)
+          break;
+      }
 
-    if (!keylog[87].handled && keylog[87].pressed) {
-      if (tankCollision && this.direction == 'up') return;
-      if (this.direction == 'right' || this.direction == 'left') {
-        this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
-      }
-      wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
-      wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
+      if (!keylog[87].handled && keylog[87].pressed) {
+        if (tankCollision && this.direction == 'up') return;
+        if (this.direction == 'right' || this.direction == 'left') {
+          this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
+        }
+        wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
+        wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
 
-      if (this.tankPosition[1] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-        this.tankPosition[1] -= 2;
-      }
-      this.direction = 'up';
+        if (this.tankPosition[1] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+          this.tankPosition[1] -= 2;
+        }
+        this.direction = 'up';
 
-    } else if (!keylog[83].handled && keylog[83].pressed) {
-      if (tankCollision && this.direction == 'down') return;
-      if (this.direction == 'right' || this.direction == 'left') {
-        this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
-      }
-      wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16) + 2)];
-      wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
+      } else if (!keylog[83].handled && keylog[83].pressed) {
+        if (tankCollision && this.direction == 'down') return;
+        if (this.direction == 'right' || this.direction == 'left') {
+          this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
+        }
+        wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16) + 2)];
+        wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
 
-      if (this.tankPosition[1] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-        this.tankPosition[1] += 2;
-      }
-      this.direction = 'down';
+        if (this.tankPosition[1] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+          this.tankPosition[1] += 2;
+        }
+        this.direction = 'down';
 
-    } else if (!keylog[68].handled && keylog[68].pressed) {
-      if (tankCollision && this.direction == 'right') return;
-      if (this.direction == 'up' || this.direction == 'down') {
-        this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
-      }
-      wallCheck1 = [(Math.floor(this.tankPosition[0] / 16) + 2), (Math.floor(this.tankPosition[1] / 16))];
-      wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
+      } else if (!keylog[68].handled && keylog[68].pressed) {
+        if (tankCollision && this.direction == 'right') return;
+        if (this.direction == 'up' || this.direction == 'down') {
+          this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
+        }
+        wallCheck1 = [(Math.floor(this.tankPosition[0] / 16) + 2), (Math.floor(this.tankPosition[1] / 16))];
+        wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
 
-      if (this.tankPosition[0] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-        this.tankPosition[0] += 2;
-      }
-      this.direction = 'right';
+        if (this.tankPosition[0] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+          this.tankPosition[0] += 2;
+        }
+        this.direction = 'right';
 
-    } else if (!keylog[65].handled && keylog[65].pressed) {
-      if (tankCollision && this.direction == 'left') return;
-      if (this.direction == 'up' || this.direction == 'down') {
-        this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
+      } else if (!keylog[65].handled && keylog[65].pressed) {
+        if (tankCollision && this.direction == 'left') return;
+        if (this.direction == 'up' || this.direction == 'down') {
+          this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
+        }
+        wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
+        wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
+        if (this.tankPosition[0] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+          this.tankPosition[0] -= 2;
+        }
+        this.direction = 'left';
       }
-      wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
-      wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
-      if (this.tankPosition[0] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-        this.tankPosition[0] -= 2;
-      }
-      this.direction = 'left';
     }
   }
 

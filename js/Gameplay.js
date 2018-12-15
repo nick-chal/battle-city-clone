@@ -32,7 +32,7 @@ var Game = function () {
     elapsed = now - then;
     if (elapsed > fpsInterval) {
       then = now - (elapsed % fpsInterval);
-      if (enemyCounter % 200 == 0) {
+      if (enemyCounter % 100 == 0) {
         if (enemyLives < enemyLimit) {
           enemy.push(new Enemy());
           enemyLives++;
@@ -118,7 +118,7 @@ var Game = function () {
           if (!enemyBullet[i].destroyed) {
             enemyBullet[i].drawBullet();
             enemyBullet[i].updateBullet(map);
-            if (player != null && enemyBullet[i].tankDetection(player.tankPosition)) {
+            if (player != null && enemyBullet[i].tankDetection(player)) {
               player = null;
             }
             if (player !== null && playerBullet != null) {
@@ -139,7 +139,7 @@ var Game = function () {
             if (!enemyBullet[i].destroyed) {
               enemyBullet[i].drawBullet();
               enemyBullet[i].updateBullet(map);
-              if (player2 != null && enemyBullet[i].tankDetection(player2.tankPosition)) {
+              if (player2 != null && enemyBullet[i].tankDetection(player2)) {
                 player2 = null;
               }
               if (player2 !== null && player2Bullet != null) {
@@ -157,7 +157,7 @@ var Game = function () {
           }
         }
         if (playerBullet != null) {
-          if (playerBullet.tankDetection(enemy[i].tankPosition)) {
+          if (playerBullet.tankDetection(enemy[i])) {
             enemy.splice(i, 1);
             sound.explosionTank.play();
             enemyBullet.splice(i, 1);
@@ -166,7 +166,7 @@ var Game = function () {
         }
         if (secondPlayer) {
           if (player2Bullet != null) {
-            if (player2Bullet.tankDetection(enemy[i].tankPosition)) {
+            if (player2Bullet.tankDetection(enemy[i])) {
               enemy.splice(i, 1);
               sound.explosionTank.play();
               enemyBullet.splice(i, 1);

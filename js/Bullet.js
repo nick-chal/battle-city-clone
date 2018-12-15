@@ -138,10 +138,14 @@ var Bullet = function (direction, position, owner) {
     }
   }
 
-  this.tankDetection = function (tankPosition) {
-    if (this.bulletPosition[0] <= tankPosition[0] + 32 && this.bulletPosition[0] + 8 >= tankPosition[0] && this.bulletPosition[1] <= tankPosition[1] + 32 && this.bulletPosition[1] + 8 >= tankPosition[1]) {
-      this.destroyed = true;
-      return true;
+  this.tankDetection = function (tank) {
+    // tank.startAnimationCounter != undefined ? console.log(tank.startAnimationCounter) : null;
+    if (tank.startAnimationCounter != undefined && tank.startAnimationCounter >= 120) {
+
+      if (this.bulletPosition[0] <= tank.tankPosition[0] + 32 && this.bulletPosition[0] + 8 >= tank.tankPosition[0] && this.bulletPosition[1] <= tank.tankPosition[1] + 32 && this.bulletPosition[1] + 8 >= tank.tankPosition[1]) {
+        this.destroyed = true;
+        return true;
+      }
     }
     return false;
   }

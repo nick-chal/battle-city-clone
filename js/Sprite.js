@@ -32,10 +32,7 @@ var Sprite = function (fn, width, height) {
   };
 
   this.drawMoving = function (x, y, spriteSheetIndex) {
-    if ((keylog[37] && keylog[37].pressed) || (keylog[38] && keylog[38].pressed) || (keylog[39] && keylog[39].pressed) || (keylog[40] && keylog[40].pressed)) {
-      updateAnimationFrame(spriteSheetIndex);
-
-    }
+    updateAnimationFrame(spriteSheetIndex);
     var resX = this.animationCurrentFrame % 2;
     canvas.context.drawImage(this.image, resX * this.S_WIDTH, 0, this.S_WIDTH, this.S_WIDTH, x, y, this.S_WIDTH, this.S_HEIGHT);
   };
