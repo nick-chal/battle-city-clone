@@ -3,6 +3,7 @@ var Editor = function () {
   var tankPosition = [0, 0];
   var itemCounter = 0;
   var positionCounter = 0;
+  var gamepadCounter = 0;
 
   this.init = function () {
     for (var i = 0; i < 26; i++) {
@@ -32,32 +33,44 @@ var Editor = function () {
     var stop = false;
     now = Date.now();
     elapsed = now - then;
+    var gamepad = pollGamepads();
     if (elapsed > fpsInterval) {
       clearMap();
       drawMap(map);
+      gamepadHandled = gamepadCounter % 5 === 0 ? false : true;
+      gamepadCounter++;
       tankEditor.draw(tankPosition[0] + PADD, tankPosition[1] + PADD);
       then = now - (elapsed % fpsInterval);
-      if (keylog[38] && !keylog[38].handled && keylog[38].pressed && tankPosition[1] > 0) {
-        tankPosition[1] -= 32;
-        keylog[38].handled = true;
-        positionCounter = 0;
+      if ((!gamepadConnected && (!keylog[38].handled && keylog[38].pressed)) || (gamepadConnected && (gamepad.axes[1] < -.99) && !gamepadHandled)) {
+        if (tankPosition[1] > 0) {
+          tankPosition[1] -= 32;
+          keylog[38].handled = true;
+          positionCounter = 0;
+          gamepadCounter = 1;
+        }
+      } else if ((!gamepadConnected && (!keylog[40].handled && keylog[40].pressed)) || (gamepadConnected && (gamepad.axes[1] > .99) && !gamepadHandled)) {
+        if (tankPosition[1] < 24 * 16) {
+          tankPosition[1] += 32;
+          keylog[40].handled = true;
+          positionCounter = 0;
+          gamepadCounter = 1;
+        }
+      } else if ((!gamepadConnected && (!keylog[39].handled && keylog[39].pressed)) || (gamepadConnected && (gamepad.axes[0] > .99) && !gamepadHandled)) {
+        if (tankPosition[0] < 24 * 16) {
+          tankPosition[0] += 32;
+          positionCounter = 0;
+          keylog[39].handled = true;
+          gamepadCounter = 1;
+        }
+      } else if ((!gamepadConnected && (!keylog[37].handled && keylog[37].pressed)) || (gamepadConnected && (gamepad.axes[0] < -.99) && !gamepadHandled)) {
+        if (tankPosition[0] > 0) {
+          tankPosition[0] -= 32;
+          keylog[37].handled = true;
+          positionCounter = 0;
+          gamepadCounter = 1;
+        }
       }
-      if (keylog[40] && !keylog[40].handled && keylog[40].pressed && tankPosition[1] < (24 * 16)) {
-        tankPosition[1] += 32;
-        keylog[40].handled = true;
-        positionCounter = 0;
-      }
-      if (keylog[39] && !keylog[39].handled && keylog[39].pressed && tankPosition[0] < (24 * 16)) {
-        tankPosition[0] += 32;
-        positionCounter = 0;
-        keylog[39].handled = true;
-      }
-      if (keylog[37] && !keylog[37].handled && keylog[37].pressed && tankPosition[0] > 0) {
-        tankPosition[0] -= 32;
-        keylog[37].handled = true;
-        positionCounter = 0;
-      }
-      if (keylog[32] && !keylog[32].handled && keylog[32].pressed) {
+      if ((!gamepadConnected && (keylog[32] && !keylog[32].handled && keylog[32].pressed)) || (gamepadConnected && gamepad.buttons[0].pressed && !gamepadHandled)) {
         if (positionCounter % 2 == 0) {
           positionCounter++;
         } else {
@@ -68,10 +81,10 @@ var Editor = function () {
             map[tankPosition[1] / 16 + i][tankPosition[0] / 16 + j] = itemCounter % 5;
           }
         }
-        keylog[32].handled = true;
+        gamepadConnected ? gamepadCounter = 1 : keylog[32].handled = true;
       }
 
-      if (keylog[13] && !keylog[13].handled && keylog[13].pressed) {
+      if ((!gamepadConnected && (keylog[13] && !keylog[13].handled && keylog[13].pressed)) || (gamepadConnected && gamepad.buttons[9].pressed)) {
         map[24][12] = 5;
         map[24][13] = 5;
         map[25][13] = 5;
@@ -95,7 +108,7 @@ var Editor = function () {
         stop = true;
         console.log(JSON.stringify(map));
         clearMap();
-        new Game().init(map, false);
+        new Game(map, false).init();
         tankEditor.draw(8 * 16 + PADD, 24 * 16 + PADD);
         keylog[13].handled = true;
       }

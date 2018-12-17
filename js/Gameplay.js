@@ -1,21 +1,22 @@
-var Game = function () {
-  var map;
+var Game = function (mapLoad, second, stageNum = 1) {
+  var map = mapLoad;
   var player;
   var player2;
   var enemy = [];
-  var secondPlayer = false;
+  var secondPlayer = second;
   var enemyBullet = [];
   var playerBullet = null;
   var player2Bullet = null;
-  var enemyLimit = 4;
+  var enemyLimit = 10;
+  var enemyKilled = 0;
   var enemyCounter = 0;
   var enemyLives = 0;
 
-  this.init = function (mapLoad, second) {
+  var stage = stageNum;
+
+  this.init = function () {
     player = new Player();
-    secondPlayer = second;
     if (secondPlayer) player2 = new Player2();
-    map = mapLoad;
     then = Date.now();
     startTime = then;
     sound.start.play();
@@ -28,12 +29,14 @@ var Game = function () {
     var stop = false;
     now = Date.now();
     // console.log('app');
+    var gamepad = {};
 
     elapsed = now - then;
     if (elapsed > fpsInterval) {
+      gamepad = pollGamepads();
       then = now - (elapsed % fpsInterval);
       if (enemyCounter % 100 == 0) {
-        if (enemyLives < enemyLimit) {
+        if (enemyLives < 4 && enemyCounter / 100 <= enemyLimit) {
           enemy.push(new Enemy());
           enemyLives++;
           enemyCounter++;
@@ -44,9 +47,9 @@ var Game = function () {
       clearMap();
       if (player === null) player = new Player();
       if (secondPlayer && player2 == null) player2 = new Player2();
-      player.updateTank(map, enemy);
+      player.updateTank(map, enemy, gamepad);
       player.drawTank();
-      if (player !== null && player.checkBulletFired()) {
+      if (player !== null && player.checkBulletFired(gamepad)) {
         var position;
         switch (player.direction) {
           case 'up':
@@ -160,6 +163,7 @@ var Game = function () {
             sound.explosionTank.play();
             enemyBullet.splice(i, 1);
             enemyLives--;
+            enemyKilled++;
           }
         }
         if (secondPlayer) {
@@ -169,6 +173,7 @@ var Game = function () {
               sound.explosionTank.play();
               enemyBullet.splice(i, 1);
               enemyLives--;
+              enemyKilled++;
             }
           }
         }
@@ -202,6 +207,8 @@ var Game = function () {
     if (keylog[13] && !keylog[13].handled && keylog[13].pressed) {
       stop = true;
     }
+    // if(enemyKilled >= enemyLimit){
+    // }
     if (!stop) {
       requestAnimationFrame(runGame);
     } else {

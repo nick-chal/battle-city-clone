@@ -3,6 +3,7 @@ var Enemy = function () {
   this.change = 'down';
   this.tankDestroyed = false;
   var generationSpot = randomGenerator(1, 3);
+  var fireRate = 0;
   this.startAnimationCounter = 0;
   switch (generationSpot) {
     case 1:
@@ -44,10 +45,12 @@ var Enemy = function () {
   }
 
   this.checkBulletFired = function () {
-    if (this.bulletFired == false) {
+    if (this.bulletFired == false && fireRate % 20 == 0) {
       this.bulletFired = true;
+      fireRate = 1;
       return true;
     }
+    fireRate++;
     return false;
   }
 

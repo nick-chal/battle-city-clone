@@ -1,4 +1,4 @@
-var Sprite = function (fn, width, height) {
+var Sprite = function (filename, width, height) {
 
   this.image = null;
   this.S_WIDTH = width;
@@ -16,8 +16,8 @@ var Sprite = function (fn, width, height) {
   };
 
   // Load the sprite
-  if (fn != undefined && fn != "" && fn != null) {
-    this.load(fn);
+  if (filename != undefined && filename != "" && filename != null) {
+    this.load(filename);
   }
 
 
@@ -38,7 +38,7 @@ var Sprite = function (fn, width, height) {
   };
 
   var updateAnimationFrame = function (spriteSheetIndex) {
-    if (that.animationDelay++ >= 1) {
+    if (that.animationDelay++ >= 2) {
       that.animationDelay = 0;
       that.animationIndexCounter++;
       if (that.animationIndexCounter >= spriteSheetIndex.length)

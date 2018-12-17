@@ -67,6 +67,22 @@ document.addEventListener('keydown', function (e) {
 
 });
 
+var interval;
+
+var gamepadConnected = false;
+var gamepadHandled = false;
+
+
+function pollGamepads() {
+  var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
+  for (var i = 0; i < gamepads.length; i++) {
+    var gp = gamepads[i];
+    if (gp) {
+      return gp;
+    }
+  }
+}
+
 document.addEventListener('keyup', function (e) {
   keylog[e.keyCode] = {
     pressed: false,
@@ -78,6 +94,14 @@ document.addEventListener('keyup', function (e) {
 document.addEventListener('DOMContentLoaded', function () {
   canvas = new Canvas('canvas');
 })
+window.addEventListener("gamepaddisconnected", function () {
+  gamepadConnected = false;
+});
+
+window.addEventListener("gamepadconnected", function () {
+  gamepadConnected = true;
+});
+
 
 var landingAnimation;
 
@@ -109,35 +133,41 @@ var initAll = function () {
 
 var landingView = function (tankPosition) {
   var stop = false;
+  var gp = pollGamepads();
+  if (gamepadConnected) {
+    if (gp.axes[1] < 0.1 && gp.axes[1] > -0.1) gamepadHandled = false;
+  }
   now = Date.now();
   elapsed = now - then;
   if (elapsed > fpsInterval) {
     canvas.context.clearRect(135, tankPosition - 16, 32, 32);
     then = now - (elapsed % fpsInterval);
-    if (!keylog[38].handled && keylog[38].pressed && tankPosition != 250) {
+    if (((!keylog[38].handled && keylog[38].pressed) || (gamepadConnected && gp.axes[1] < -.99 && !gamepadHandled)) && tankPosition != 250) {
       tankPosition -= 50;
+      gamepadConnected ? gamepadHandled = true : null;
       keylog[38].handled = true;
     }
-    if (!keylog[40].handled && keylog[40].pressed && tankPosition != 400) {
+    if (((!keylog[40].handled && keylog[40].pressed) || (gamepadConnected && gp.axes[1] > .99 && !gamepadHandled)) && tankPosition != 400) {
       tankPosition += 50;
+      gamepadConnected ? gamepadHandled = true : null;
       keylog[40].handled = true;
     }
     tankRight.drawAnimated(135, tankPosition - 16, [0, 1]);
-    if (keylog[13].pressed) {
-      if (tankPosition === 350 && !keylog[13].handled) {
+    if ((keylog[13].pressed && !keylog[13].handled) || (gamepadConnected && gp.buttons[0].pressed)) {
+      if (tankPosition === 350) {
         cancelAnimationFrame(landingAnimation);
         canvas.context.clearRect(0, 0, 500, 500);
         new Editor().init();
         stop = true;
-      } else if (tankPosition === 300 && !keylog[13].handled) {
+      } else if (tankPosition === 300) {
         canvas.context.clearRect(0, 0, 500, 500);
-        var mapLoad = map2.slice();
-        new Game().init(mapLoad, true);
+        var mapLoad = JSON.parse(JSON.stringify(stages));
+        new Game(mapLoad[1], true, 1).init();
         stop = true;
-      } else if (tankPosition === 250 && !keylog[13].handled) {
+      } else if (tankPosition === 250) {
         canvas.context.clearRect(0, 0, 500, 500);
-        var mapLoad = map2.slice();
-        new Game().init(mapLoad, false);
+        var mapLoad = JSON.parse(JSON.stringify(stages));
+        new Game(mapLoad[1], false, 1).init();
         stop = true;
       }
       keylog[13].handled = true;

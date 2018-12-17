@@ -30,16 +30,16 @@ var Player = function () {
     }
   }
 
-  this.checkBulletFired = function () {
-    if (keylog[32].pressed && !keylog[32].handled && this.bulletFired == false) {
+  this.checkBulletFired = function (gamepad) {
+    if ((!gamepadConnected && (keylog[32].pressed && !keylog[32].handled && this.bulletFired == false)) || (gamepadConnected && gamepad.buttons[0].pressed && this.bulletFired == false)) {
       this.bulletFired = true;
-      keylog[32].handled = true;
+      if (!gamepadConnected) keylog[32].handled = true;
       return true;
     }
     return false;
   }
 
-  this.updateTank = function (map, enemyList) {
+  this.updateTank = function (map, enemyList, gamepad) {
     var wallCheck1 = [];
     var wallCheck2 = [];
     var tankCollision = false;
@@ -55,8 +55,7 @@ var Player = function () {
         if (tankCollision)
           break;
       }
-
-      if (!keylog[38].handled && keylog[38].pressed) {
+      if ((!gamepadConnected && (!keylog[38].handled && keylog[38].pressed)) || (gamepadConnected && (gamepad.axes[1] < -.99))) {
         if (tankCollision && this.direction == 'up') return;
         if (this.direction == 'right' || this.direction == 'left') {
           this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
@@ -69,7 +68,7 @@ var Player = function () {
         }
         this.direction = 'up';
 
-      } else if (!keylog[40].handled && keylog[40].pressed) {
+      } else if ((!gamepadConnected && (!keylog[40].handled && keylog[40].pressed)) || (gamepadConnected && (gamepad.axes[1] > .99))) {
         if (tankCollision && this.direction == 'down') return;
         if (this.direction == 'right' || this.direction == 'left') {
           this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
@@ -82,7 +81,7 @@ var Player = function () {
         }
         this.direction = 'down';
 
-      } else if (!keylog[39].handled && keylog[39].pressed) {
+      } else if ((!gamepadConnected && (!keylog[39].handled && keylog[39].pressed)) || (gamepadConnected && (gamepad.axes[0] > .99))) {
         if (tankCollision && this.direction == 'right') return;
         if (this.direction == 'up' || this.direction == 'down') {
           this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
@@ -95,7 +94,7 @@ var Player = function () {
         }
         this.direction = 'right';
 
-      } else if (!keylog[37].handled && keylog[37].pressed) {
+      } else if ((!gamepadConnected && (!keylog[37].handled && keylog[37].pressed)) || (gamepadConnected && (gamepad.axes[0] < -.99))) {
         if (tankCollision && this.direction == 'left') return;
         if (this.direction == 'up' || this.direction == 'down') {
           this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
