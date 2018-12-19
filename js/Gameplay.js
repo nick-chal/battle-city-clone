@@ -16,6 +16,7 @@ var Game = function (second) {
   var enemyCounter;
   var enemyLives;
   var pause;
+  var pauseHandled
   var gameoverCounter = null;
   // var stageoverCounter = null;
 
@@ -27,7 +28,7 @@ var Game = function (second) {
     enemyBullet = [];
     playerBullet = null;
     player2Bullet = null;
-    enemyLimit = 5;
+    enemyLimit = 10;
     enemyKilled = 0;
     enemyCounter = 0;
     enemyLives = 0;
@@ -47,9 +48,11 @@ var Game = function (second) {
   var runGame = function () {
     var stop = false;
     now = Date.now();
-
-    if (!keylog[13].handled && keylog[13].pressed) {
+    var gp = pollGamepads();
+    pauseHandled = (gamepadConnected && !gp.buttons[9].pressed) ? false : pauseHandled;
+    if ((!keylog[13].handled && keylog[13].pressed) || (gamepadConnected && gp.buttons[9].pressed && !pauseHandled)) {
       pause = !pause;
+      pauseHandled = true;
       keylog[13].handled = true;
     }
     elapsed = now - then;
@@ -57,7 +60,7 @@ var Game = function (second) {
       if (gameoverCounter) gameoverCounter++;
       then = now - (elapsed % fpsInterval);
       if (enemyCounter % 100 == 0) {
-        if (enemyLives < 4 && enemyCounter / 100 < enemyLimit) {
+        if (enemyLives < 5 && enemyCounter / 100 < enemyLimit) {
           enemy.push(new Enemy());
           enemyLives++;
           enemyCounter++;
@@ -67,6 +70,7 @@ var Game = function (second) {
       }
       clearMap();
       drawInfo();
+      keyMapping();
       if (player === null && player1Lives >= 0) player = new Player();
       if (secondPlayer && player2 === null && player2Lives >= 0) player2 = new Player2();
       if (player !== null) playerUpdates(player, 1);
@@ -264,6 +268,12 @@ var Game = function (second) {
         xpos = 485;
       }
     }
+  }
+
+  keyMapping = function () {
+    if (gamepadConnected) p1GamepadKey.draw(43, 480);
+    else p1Keymap.draw(43, 480);
+    if (secondPlayer) p2Keymap.draw(320, 480);
   }
 
   gameOverScreen = function () {

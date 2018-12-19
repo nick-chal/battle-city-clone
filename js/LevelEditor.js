@@ -38,6 +38,7 @@ var Editor = function () {
       clearMap();
       drawMap(map);
       editorActive();
+      keyMapping();
       gamepadHandled = gamepadCounter % 5 === 0 ? false : true;
       gamepadCounter++;
       tankEditor.draw(tankPosition[0] + PADD, tankPosition[1] + PADD);
@@ -135,6 +136,11 @@ var Editor = function () {
     canvas.context.fillStyle = 'red';
     canvas.context.fillRect(485, 82 + (47 * (itemCounter % 5)), 38, 38);
     mapType.draw(488, 85);
+  }
+
+  keyMapping = function () {
+    if (gamepadConnected) gamepadEditor.draw(43, 480);
+    else keyEditor.draw(43, 480);
   }
 
 

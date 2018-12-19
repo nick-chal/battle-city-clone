@@ -17,6 +17,23 @@ var proxyHandler = {
 };
 
 var keylog = new Proxy({}, proxyHandler);
+var sound = {
+  bullet: new Audio('assets/sound/bullet_shot.ogg'),
+  start: new Audio('assets/sound/stage_start.ogg'),
+  over: new Audio('assets/sound/game_over.ogg'),
+  bulletWall: new Audio('assets/sound/bullet_hit_1.ogg'),
+  bulletBrick: new Audio('assets/sound/bullet_hit_2.ogg'),
+  explosionTank: new Audio('assets/sound/explosion_1.ogg'),
+  explosionBase: new Audio('assets/sound/explosion_2.ogg')
+}
+
+var homekey = new Sprite('assets/images/home_key.png', 250, 140);
+var gamepadHome = new Sprite('assets/images/gamepad_home.png', 250, 140);
+var gamepadEditor = new Sprite('assets/images/editor_gamepad_map.png', 250, 140);
+var p1GamepadKey = new Sprite('assets/images/game_gamepad_key.png', 250, 140);
+var p1Keymap = new Sprite('assets/images/game_keyboard_key.png', 250, 140);
+var p2Keymap = new Sprite('assets/images/game_p2_key.png', 250, 140);
+var keyEditor = new Sprite('assets/images/editor_key_map.png', 250, 140);
 var mapType = new Sprite('assets/images/editor_active.png', 32, 220)
 var brick = new Sprite('assets/images/wall_brick.png', 16, 16);
 var steel = new Sprite('assets/images/wall_steel.png', 16, 16);
@@ -62,16 +79,6 @@ var bulletUp = new Sprite('assets/images/bullet_up.png', 8, 8);
 
 var battleCity = new Sprite('assets/images/battle_city.png', 376, 136);
 var gameOver = new Sprite('assets/images/game_over.png', 248, 160);
-
-var sound = {
-  bullet: new Audio('assets/sound/bullet_shot.ogg'),
-  start: new Audio('assets/sound/stage_start.ogg'),
-  over: new Audio('assets/sound/game_over.ogg'),
-  bulletWall: new Audio('assets/sound/bullet_hit_1.ogg'),
-  bulletBrick: new Audio('assets/sound/bullet_hit_2.ogg'),
-  explosionTank: new Audio('assets/sound/explosion_1.ogg'),
-  explosionBase: new Audio('assets/sound/explosion_2.ogg')
-}
 
 document.addEventListener('keydown', function (e) {
   keylog[e.keyCode] = {
@@ -156,6 +163,9 @@ var landingView = function (tankPosition) {
   elapsed = now - then;
   if (elapsed > fpsInterval) {
     canvas.context.clearRect(135, tankPosition - 16, 32, 32);
+    canvas.context.clearRect(0, 450, 550, 600);
+    homekey.draw(25, 450);
+    if (gamepadConnected) gamepadHome.draw(300, 450);
     then = now - (elapsed % fpsInterval);
     if (((!keylog[38].handled && keylog[38].pressed) || (gamepadConnected && gp.axes[1] < -.99 && !gamepadHandled)) && tankPosition != 250) {
       tankPosition -= 50;

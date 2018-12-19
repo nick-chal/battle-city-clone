@@ -1,9 +1,8 @@
-var Enemy = function () {
+var Enemy = function (enemy) {
   this.direction = 'down';
   this.change = 'down';
   this.tankDestroyed = false;
   this.bulletFired = true;
-  var generationSpot = randomGenerator(1, 3);
   var temp = randomGenerator(0, 10);
   if (temp < 7) {
     var fireLimit = 20;
@@ -23,6 +22,9 @@ var Enemy = function () {
   }
   var fireRate = 0;
   this.startAnimationCounter = 0;
+  var ok = false;
+
+  var generationSpot = randomGenerator(1, 3);
   switch (generationSpot) {
     case 1:
       this.tankPosition = [0, 0];
@@ -33,6 +35,22 @@ var Enemy = function () {
     case 3:
       this.tankPosition = [24 * 16, 0];
       break;
+  }
+
+  this.allEnemyCheck = function (enemyList, index, player) {
+    var collision = false;
+    for (var i = 0; i < enemyList.length; i++) {
+      if (index !== i) {
+        collision = this.tankTankCollision(enemyList[i].tankPosition);
+        if (collision && enemyList[i].startAnimationCounter < 120) collision = false;
+        if (collision && (this.tankPosition[0] <= 64 && this.tankPosition[1] <= 64)) collision = false;
+      }
+      if (collision) return true;
+      if (i == enemyList.length - 1 && !collision && player !== null) {
+        collision = this.tankTankCollision(player.tankPosition);
+      }
+    }
+    return false;
   }
 
   this.drawTank = function () {
@@ -76,209 +94,205 @@ var Enemy = function () {
       this.startAnimationCounter++;
       if (this.startAnimationCounter >= 120) this.bulletFired = false;
     } else {
-      for (var i = 0; i < enemyList.length; i++) {
-        if (index !== i) {
-          tankCollision = this.tankTankCollision(enemyList[i].tankPosition);
-        }
-        if (tankCollision) break;
-        if (i == enemyList.length - 1 && !tankCollision && player !== null) {
-          tankCollision = this.tankTankCollision(player.tankPosition);
-        }
-      }
       if (this.change == 'up') {
-        if (tankCollision && this.direction == 'up') {
-          this.change = 'up';
-        }
-        if (this.direction == 'right' || this.direction == 'left') {
-          var tempPosition = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
-          if (tempPosition < 0) this.tankPosition[0] = 0;
-          else if (tempPosition > 24 * 16) this.tankPosition[0] = 24 * 16;
-          else this.tankPosition[0] = tempPosition;
-        }
         wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
         wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
-
-        if (this.tankPosition[1] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-          this.direction = this.change;
-          this.tankPosition[1] -= this.tankSpeed;
-          switch (randomGenerator(1, 200)) {
-            case 1:
-              this.change = 'down';
-              break;
-            case 2:
-              this.change = 'right';
-              break;
-            case 3:
-              this.change = 'left';
-              break;
-            default:
-              this.change = this.direction;
-          }
-        } else {
-          switch (randomGenerator(1, 10)) {
-            case 1:
-              this.change = 'down';
-              break;
-            case 2:
-              this.change = 'right';
-              break;
-            case 3:
-              this.change = 'left';
-              break;
-            default:
-              this.change = this.direction;
-
-          }
-        }
-        this.direction = 'up';
-
-      } else if (this.change == 'down') {
-        if (tankCollision && this.direction == 'down') {
+        tankCollision = this.allEnemyCheck(enemyList, index, player);
+        if (tankCollision && this.direction == 'up') {
           this.change = 'down';
+        } else {
+          if (this.direction == 'right' || this.direction == 'left') {
+            var tempPosition = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
+            if (tempPosition < 0) this.tankPosition[0] = 0;
+            else if (tempPosition > 24 * 16) this.tankPosition[0] = 24 * 16;
+            else this.tankPosition[0] = tempPosition;
+          }
+          if (this.tankPosition[1] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+            this.direction = this.change;
+            this.tankPosition[1] -= this.tankSpeed;
+            switch (randomGenerator(1, 200)) {
+              case 1:
+                this.change = 'down';
+                break;
+              case 2:
+                this.change = 'right';
+                break;
+              case 3:
+                this.change = 'left';
+                break;
+              default:
+                this.change = this.direction;
+            }
+          } else {
+            switch (randomGenerator(1, 10)) {
+              case 1:
+                this.change = 'down';
+                break;
+              case 2:
+                this.change = 'right';
+                break;
+              case 3:
+                this.change = 'left';
+                break;
+              default:
+                this.change = this.direction;
+            }
+          }
         }
-        if (this.direction == 'right' || this.direction == 'left') {
-          var tempPosition = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
-          if (tempPosition < 0) this.tankPosition[0] = 0;
-          else if (tempPosition > 24 * 16) this.tankPosition[0] = 24 * 16;
-          else this.tankPosition[0] = tempPosition;
-        }
+        if (!tankCollision) this.direction = 'up';
+      } else if (this.change == 'down') {
         wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16) + 2)];
         wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
-
-        if (this.tankPosition[1] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-          this.direction = this.change;
-          this.tankPosition[1] += this.tankSpeed;
-          switch (randomGenerator(1, 200)) {
-            case 1:
-              this.change = 'up';
-              break;
-            case 2:
-              this.change = 'right';
-              break;
-            case 3:
-              this.change = 'left';
-              break;
-            default:
-              this.change = this.direction;
-          }
+        tankCollision = this.allEnemyCheck(enemyList, index, player);
+        if (tankCollision && this.direction == 'down') {
+          this.change = 'up';
         } else {
-          switch (randomGenerator(1, 10)) {
-            case 1:
-              this.change = 'up';
-              break;
-            case 2:
-              this.change = 'right';
-              break;
-            case 3:
-              this.change = 'left';
-              break;
-            default:
-              this.change = this.direction;
+          if (this.direction == 'right' || this.direction == 'left') {
+            var tempPosition = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
+            if (tempPosition < 0) this.tankPosition[0] = 0;
+            else if (tempPosition > 24 * 16) this.tankPosition[0] = 24 * 16;
+            else this.tankPosition[0] = tempPosition;
+          }
+          if (this.tankPosition[1] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+            this.direction = this.change;
+            this.tankPosition[1] += this.tankSpeed;
+            switch (randomGenerator(1, 200)) {
+              case 1:
+                this.change = 'up';
+                break;
+              case 2:
+                this.change = 'right';
+                break;
+              case 3:
+                this.change = 'left';
+                break;
+              default:
+                this.change = this.direction;
+            }
+          } else {
+            switch (randomGenerator(1, 10)) {
+              case 1:
+                this.change = 'up';
+                break;
+              case 2:
+                this.change = 'right';
+                break;
+              case 3:
+                this.change = 'left';
+                break;
+              default:
+                this.change = this.direction;
 
+            }
           }
         }
         this.direction = 'down';
 
       } else if (this.change == 'right') {
-        if (tankCollision && this.direction == 'right') {
-          this.change = 'left';
-        }
-        if (this.direction == 'up' || this.direction == 'down') {
-          var tempPosition = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
-          if (tempPosition < 0) this.tankPosition[1] = 0;
-          else if (tempPosition > 24 * 16) this.tankPosition[1] = 24 * 16;
-          else this.tankPosition[1] = tempPosition;
-        }
         wallCheck1 = [(Math.floor(this.tankPosition[0] / 16) + 2), (Math.floor(this.tankPosition[1] / 16))];
         wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
-
-        if (this.tankPosition[0] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-          this.direction = this.change;
-          this.tankPosition[0] += this.tankSpeed;
-          switch (randomGenerator(1, 200)) {
-            case 1:
-              this.change = 'down';
-              break;
-            case 2:
-              this.change = 'up';
-              break;
-            case 3:
-              this.change = 'left';
-              break;
-            default:
-              this.change = this.direction;
-          }
+        tankCollision = this.allEnemyCheck(enemyList, index, player);
+        if (tankCollision && this.direction == 'right') {
+          this.change = 'left';
         } else {
-          switch (randomGenerator(1, 10)) {
-            case 1:
-              this.change = 'down';
-              break;
-            case 2:
-              this.change = 'up';
-              break;
-            case 3:
-              this.change = 'left';
-              break;
-            default:
-              this.change = this.direction;
+          if (this.direction == 'up' || this.direction == 'down') {
+            var tempPosition = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
+            if (tempPosition < 0) this.tankPosition[1] = 0;
+            else if (tempPosition > 24 * 16) this.tankPosition[1] = 24 * 16;
+            else this.tankPosition[1] = tempPosition;
+          }
+          if (this.tankPosition[0] < (24 * 16) && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+            this.direction = this.change;
+            this.tankPosition[0] += this.tankSpeed;
+            switch (randomGenerator(1, 200)) {
+              case 1:
+                this.change = 'down';
+                break;
+              case 2:
+                this.change = 'up';
+                break;
+              case 3:
+                this.change = 'left';
+                break;
+              default:
+                this.change = this.direction;
+            }
+          } else {
+            switch (randomGenerator(1, 10)) {
+              case 1:
+                this.change = 'down';
+                break;
+              case 2:
+                this.change = 'up';
+                break;
+              case 3:
+                this.change = 'left';
+                break;
+              default:
+                this.change = this.direction;
 
+            }
           }
         }
-        this.direction = 'right';
-
+        if (!tankCollision) this.direction = 'right';
       } else if (this.change == 'left') {
-        if (tankCollision && this.direction == 'left') {
-          this.change = 'right';
-        }
-        if (this.direction == 'up' || this.direction == 'down') {
-          var tempPosition = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
-          if (tempPosition < 0) this.tankPosition[1] = 0;
-          else if (tempPosition > 24 * 16) this.tankPosition[1] = 24 * 16;
-          else this.tankPosition[1] = tempPosition;
-        }
         wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
         wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
-        if (this.tankPosition[0] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
-          this.direction = this.change;
-          this.tankPosition[0] -= this.tankSpeed;
-          switch (randomGenerator(1, 200)) {
-            case 1:
-              this.change = 'down';
-              break;
-            case 2:
-              this.change = 'right';
-              break;
-            case 3:
-              this.change = 'up';
-              break;
-            default:
-              this.change = this.direction;
-          }
+        tankCollision = this.allEnemyCheck(enemyList, index, player);
+        if (tankCollision && this.direction == 'left') {
+          this.change = 'right';
         } else {
-          switch (randomGenerator(1, 10)) {
-            case 1:
-              this.change = 'down';
-              break;
-            case 2:
-              this.change = 'right';
-              break;
-            case 3:
-              this.change = 'up';
-              break;
-            default:
-              this.change = this.direction;
+          if (this.direction == 'up' || this.direction == 'down') {
+            var tempPosition = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
+            if (tempPosition < 0) this.tankPosition[1] = 0;
+            else if (tempPosition > 24 * 16) this.tankPosition[1] = 24 * 16;
+            else this.tankPosition[1] = tempPosition;
+          }
+          wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
+          wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
+          if (this.tankPosition[0] > 0 && !this.collisionDetection(map, wallCheck1, wallCheck2)) {
+            this.direction = this.change;
+            this.tankPosition[0] -= this.tankSpeed;
+            switch (randomGenerator(1, 200)) {
+              case 1:
+                this.change = 'down';
+                break;
+              case 2:
+                this.change = 'right';
+                break;
+              case 3:
+                this.change = 'up';
+                break;
+              default:
+                this.change = this.direction;
+            }
+          } else {
+            switch (randomGenerator(1, 10)) {
+              case 1:
+                this.change = 'down';
+                break;
+              case 2:
+                this.change = 'right';
+                break;
+              case 3:
+                this.change = 'up';
+                break;
+              default:
+                this.change = this.direction;
 
+            }
           }
         }
-        this.direction = 'left';
+        if (!tankCollision) this.direction = 'left';
       }
     }
   }
 
   this.tankTankCollision = function (position) {
-    console.log();
-    if (this.tankPosition[0] <= position[0] + 32 && this.tankPosition[0] + 32 >= position[0] && this.tankPosition[1] <= position[1] + 32 && this.tankPosition[1] + 32 >= position[1]) {
-      return true;
+    if ((this.direction === 'left' && this.tankPosition[0] >= (position[0] + 32)) || (this.direction === 'right' && this.tankPosition[0] <= (position[0] + 32)) || (this.direction === 'up' && this.tankPosition[1] >= (position[1] + 32)) || (this.direction === 'down' && this.tankPosition[1] <= (position[1] + 32))) {
+      if (this.tankPosition[0] <= position[0] + 32 && this.tankPosition[0] + 32 >= position[0] && this.tankPosition[1] <= position[1] + 32 && this.tankPosition[1] + 32 >= position[1]) {
+        return true;
+      }
     }
     return false;
   }
@@ -293,6 +307,7 @@ var Enemy = function () {
     }
     return false;
   }
+
 
   checkNegative = function (arr) {
     for (var i = 0; i < arr.length; i++) {
