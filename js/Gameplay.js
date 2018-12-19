@@ -28,7 +28,7 @@ var Game = function (second) {
     enemyBullet = [];
     playerBullet = null;
     player2Bullet = null;
-    enemyLimit = 10;
+    enemyLimit = 18;
     enemyKilled = 0;
     enemyCounter = 0;
     enemyLives = 0;
@@ -60,7 +60,7 @@ var Game = function (second) {
       if (gameoverCounter) gameoverCounter++;
       then = now - (elapsed % fpsInterval);
       if (enemyCounter % 100 == 0) {
-        if (enemyLives < 5 && enemyCounter / 100 < enemyLimit) {
+        if (enemyLives < 4 && enemyCounter / 100 < enemyLimit) {
           enemy.push(new Enemy());
           enemyLives++;
           enemyCounter++;
