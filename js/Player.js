@@ -1,18 +1,16 @@
 var Player = function () {
-  // this.xPosition = 8 * 16;
-  // this.yPosition = 24 * 16;
-  this.direction = 'up';
-  this.tankPosition = [8 * 16, 24 * 16];
-  this.bulletFired = true;
-  var that = this;
-  this.startAnimationCounter = 0;
+  this.direction = 'up'; //initital facing
+  this.tankPosition = [8 * 16, 24 * 16]; //creation position
+  this.bulletFired = false;
+  // var that = this;
+  this.startAnimationCounter = 0; //creation time animation
 
   this.drawTank = function () {
     var currTankImage = null;
-    if (this.startAnimationCounter < 120) {
+    if (this.startAnimationCounter < 120) { //draw creation animation
       creation.drawAnimated(this.tankPosition[0] + PADD, this.tankPosition[1] + PADD, [0, 1, 2, 3, 4, 5])
     } else {
-      switch (this.direction) {
+      switch (this.direction) { //select tank direction sprite
         case 'up':
           currTankImage = tankUp;
           break;
@@ -30,6 +28,7 @@ var Player = function () {
     }
   }
 
+  /*check if ready to create new bullet */
   this.checkBulletFired = function (gamepad) {
     if ((!gamepadConnected && (keylog[32].pressed && !keylog[32].handled && this.bulletFired == false)) || (gamepadConnected && gamepad.buttons[0].pressed && this.bulletFired == false)) {
       this.bulletFired = true;
@@ -39,6 +38,7 @@ var Player = function () {
     return false;
   }
 
+  /*update tank and position along with collision check */
   this.updateTank = function (map, enemyList, gamepad) {
     var wallCheck1 = [];
     var wallCheck2 = [];
@@ -110,6 +110,7 @@ var Player = function () {
 
   }
 
+  /*check collision with enemy */
   this.tankTankCollision = function (position) {
     if (this.tankPosition[0] <= position[0] + 32 && this.tankPosition[0] + 32 >= position[0] && this.tankPosition[1] <= position[1] + 32 && this.tankPosition[1] + 32 >= position[1]) {
       return true;
@@ -117,6 +118,7 @@ var Player = function () {
     return false;
   }
 
+  /*check map element collision */
   this.collisionDetection = function (map, wall1, wall2) {
     if (map[wall1[1]][wall1[0]] == 1 || map[wall1[1]][wall1[0]] == 2 || map[wall1[1]][wall1[0]] == 4 || map[wall1[1]][wall1[0]] == 5) {
       return true;

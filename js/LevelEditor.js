@@ -1,10 +1,11 @@
 var Editor = function () {
   var map = [];
   var tankPosition = [0, 0];
-  var itemCounter = 0;
-  var positionCounter = 0;
-  var gamepadCounter = 0;
+  var itemCounter = 0; //indicate the active map element
+  var positionCounter = 0; //check if tank is already present
+  var gamepadCounter = 0; //delay the gamepad event until action taken
 
+  /*initialize the empty map with the base */
   this.init = function () {
     for (var i = 0; i < 26; i++) {
       var tempArr = []
@@ -29,6 +30,7 @@ var Editor = function () {
     });
   }
 
+  /*move tank and update the map*/
   var animateEditor = function () {
     var stop = false;
     now = Date.now();
@@ -39,10 +41,14 @@ var Editor = function () {
       drawMap(map);
       editorActive();
       keyMapping();
+
       gamepadHandled = gamepadCounter % 5 === 0 ? false : true;
       gamepadCounter++;
+
       tankEditor.draw(tankPosition[0] + PADD, tankPosition[1] + PADD);
+
       then = now - (elapsed % fpsInterval);
+
       if ((!gamepadConnected && (!keylog[38].handled && keylog[38].pressed)) || (gamepadConnected && (gamepad.axes[1] < -.99) && !gamepadHandled)) {
         if (tankPosition[1] > 0) {
           tankPosition[1] -= 32;
@@ -87,6 +93,7 @@ var Editor = function () {
       }
 
       if ((!gamepadConnected && (keylog[13] && !keylog[13].handled && keylog[13].pressed)) || (gamepadConnected && gamepad.buttons[9].pressed)) {
+        /*completing the map with base and space for generation */
         map[24][12] = 5;
         map[24][13] = 5;
         map[25][13] = 5;
@@ -108,16 +115,14 @@ var Editor = function () {
         map[25][9] = 0;
         map[25][8] = 0;
         stop = true;
+
         console.log(JSON.stringify(map));
         clearMap();
-        game = new Game(false);
-        game.init(map);
-        tankEditor.draw(8 * 16 + PADD, 24 * 16 + PADD);
         keylog[13].handled = true;
+        game = new Game(false);
+        game.init(map); //start gameplay from this map
       }
-
     }
-
 
     if (!stop) {
       requestAnimationFrame(function () {
@@ -127,6 +132,7 @@ var Editor = function () {
 
   }
 
+  /*highlight the active tile */
   editorActive = function () {
     canvas.context.font = '10px prstart';
     canvas.context.fillStyle = 'black';

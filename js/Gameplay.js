@@ -18,7 +18,8 @@ var Game = function (second) {
   var pause;
   var pauseHandled
   var gameoverCounter = null;
-  // var stageoverCounter = null;
+  var maxEnemyScreen = 4;
+
 
   var stage;
 
@@ -35,8 +36,6 @@ var Game = function (second) {
     enemyLeft = enemyLimit;
     stage = stageNum;
     gameoverCounter = 0;
-    // player = new Player();
-    // if (secondPlayer) player2 = new Player2();
     then = Date.now();
     startTime = then;
     sound.start.play();
@@ -56,11 +55,13 @@ var Game = function (second) {
       keylog[13].handled = true;
     }
     elapsed = now - then;
-    if (elapsed > fpsInterval && !pause) {
+
+    if (elapsed > fpsInterval && !pause) { //checking fps
       if (gameoverCounter) gameoverCounter++;
       then = now - (elapsed % fpsInterval);
+
       if (enemyCounter % 100 == 0) {
-        if (enemyLives < 4 && enemyCounter / 100 < enemyLimit) {
+        if (enemyLives < maxEnemyScreen && enemyCounter / 100 < enemyLimit) {
           enemy.push(new Enemy());
           enemyLives++;
           enemyCounter++;
@@ -68,13 +69,17 @@ var Game = function (second) {
       } else {
         enemyCounter++;
       }
+
       clearMap();
       drawInfo();
       keyMapping();
-      if (player === null && player1Lives >= 0) player = new Player();
+
+      if (player === null && player1Lives >= 0) player = new Player(); //create player after killed
       if (secondPlayer && player2 === null && player2Lives >= 0) player2 = new Player2();
       if (player !== null) playerUpdates(player, 1);
       if (secondPlayer && player2 !== null) playerUpdates(player2, 2);
+
+      /*Update all enemies and thei bullets */
       for (var i = 0; i < enemy.length; i++) {
         enemyUpdates(i);
         if (enemyBullet[i]) {
@@ -103,16 +108,20 @@ var Game = function (second) {
         playerBulletUpdates(player2Bullet, 2);
       }
     }
+
     drawMap(map);
 
+    /*Check if both players are out of life */
     if (player1Lives < 0 && player2Lives < 0) {
       stop = gameOverScreen();
     }
 
+    /*Check if base is destroyed */
     if (map[24][12] == 6 || map[24][13] == 6 || map[25][13] == 6 || map[25][12] == 6) {
       if (!gameoverCounter) sound.explosionBase.play();
       stop = gameOverScreen();
     }
+    /*Check all enemies are killed */
     if (enemyLeft <= 0) {
       if (!gameoverCounter) gameoverCounter = 1;
       if (gameoverCounter >= 100) {
@@ -129,6 +138,7 @@ var Game = function (second) {
         }
       }
     }
+
     if (!stop) {
       requestAnimationFrame(runGame);
     } else {
@@ -139,7 +149,7 @@ var Game = function (second) {
     }
   }
 
-
+  /*Update and draw player 1 and 2 also initiate player bullet if fired*/
   playerUpdates = function (player, playerNumber) {
     gp = pollGamepads()
     player.updateTank(map, enemy, gp);
@@ -166,6 +176,7 @@ var Game = function (second) {
     }
   }
 
+  /*Update every enemy and also initiate the bullet if ready */
   enemyUpdates = function (i) {
     enemy[i].updateTank(map, enemy, i, player);
     enemy[i].drawTank();
@@ -189,6 +200,7 @@ var Game = function (second) {
     }
   }
 
+  /*Check if enemy bullet hits the player 1 or 2 also bullet-bullet collision of enemy and player */
   enemyBulletCheck = function (playerTank, i, playerNumber) {
     if (playerTank != null && enemyBullet[i].tankDetection(playerTank)) {
       playerTank = null;
@@ -206,6 +218,7 @@ var Game = function (second) {
     }
   }
 
+  /*Check player 1 and 2 bullet collision with enemies */
   playerBulletEnemyCheck = function (plBullet, i, playerNum) {
     if (plBullet != null && enemy[i]) {
       if (plBullet.tankDetection(enemy[i])) {
@@ -227,6 +240,7 @@ var Game = function (second) {
     }
   }
 
+  /*Updating and drawing player 1 and 2 bullets */
   playerBulletUpdates = function (plBullet, playerNum) {
     if (plBullet != null) {
       if (!plBullet.destroyed) {
@@ -241,6 +255,7 @@ var Game = function (second) {
     }
   }
 
+  /*Drawing score, lives and enemies left*/
   drawInfo = function () {
     canvas.context.font = '10px prstart';
     canvas.context.fillStyle = 'black';
@@ -270,12 +285,14 @@ var Game = function (second) {
     }
   }
 
+  /* Drawing the controls instruction*/
   keyMapping = function () {
     if (gamepadConnected) p1GamepadKey.draw(43, 480);
     else p1Keymap.draw(43, 480);
     if (secondPlayer) p2Keymap.draw(320, 480);
   }
 
+  /*Drawing GameOver Text */
   gameOverScreen = function () {
     canvas.context.font = '20px prstart';
     canvas.context.fillStyle = 'red';

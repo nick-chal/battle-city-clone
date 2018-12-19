@@ -2,6 +2,8 @@ var Bullet = function (direction, position, owner) {
   this.direction = direction;
   this.bulletPosition = position;
   var owner = owner;
+
+  /*Check the owner is enemy or player */
   switch (owner) {
     case 0:
       this.speed = 4;
@@ -14,6 +16,7 @@ var Bullet = function (direction, position, owner) {
 
   var currBulletImage = null;
 
+  /*Select bullet sprite */
   switch (this.direction) {
     case 'up':
       currBulletImage = bulletUp;
@@ -42,6 +45,7 @@ var Bullet = function (direction, position, owner) {
 
   }
 
+  /*update bullet after bullet hits base or brick */
   var updateMap = function (map, wall1, wall2) {
     if (owner === 0) {
       if (map[wall1[1]][wall1[0]] == 1 || map[wall2[1]][wall2[0]] == 1) sound.bulletBrick.play();
@@ -71,6 +75,7 @@ var Bullet = function (direction, position, owner) {
     }
   }
 
+  /*update bullet position and check collision */
   this.updateBullet = function (map) {
     switch (this.direction) {
       case 'up':
@@ -144,8 +149,8 @@ var Bullet = function (direction, position, owner) {
     }
   }
 
+  /*check if bullet hits any tank(enemy->player or player->enemy) */
   this.tankDetection = function (tank) {
-    // tank.startAnimationCounter != undefined ? console.log(tank.startAnimationCounter) : null;
     if (tank.startAnimationCounter != undefined && tank.startAnimationCounter >= 120) {
 
       if (this.bulletPosition[0] <= tank.tankPosition[0] + 32 && this.bulletPosition[0] + 8 >= tank.tankPosition[0] && this.bulletPosition[1] <= tank.tankPosition[1] + 32 && this.bulletPosition[1] + 8 >= tank.tankPosition[1]) {
@@ -164,6 +169,7 @@ var Bullet = function (direction, position, owner) {
     return false;
   }
 
+  /*check if bullet hits the map elements */
   this.collisionDetection = function (map, wall1, wall2) {
     if (map[wall1[1]][wall1[0]] == 1 || map[wall1[1]][wall1[0]] == 2 || map[wall1[1]][wall1[0]] == 5) {
       return true;

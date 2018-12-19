@@ -4,6 +4,7 @@ var fps = 60;
 var fpsInterval = 1000 / fps;
 var startTime, now, then, elapsed;
 
+/*tank and map co-ordinate padding */
 var PADD = 42;
 
 var proxyHandler = {
@@ -16,7 +17,10 @@ var proxyHandler = {
   }
 };
 
+/*if no key pressed return pressed false */
 var keylog = new Proxy({}, proxyHandler);
+
+/*load sound */
 var sound = {
   bullet: new Audio('assets/sound/bullet_shot.ogg'),
   start: new Audio('assets/sound/stage_start.ogg'),
@@ -27,6 +31,7 @@ var sound = {
   explosionBase: new Audio('assets/sound/explosion_2.ogg')
 }
 
+/*Load all Sprites */
 var homekey = new Sprite('assets/images/home_key.png', 250, 140);
 var gamepadHome = new Sprite('assets/images/gamepad_home.png', 250, 140);
 var gamepadEditor = new Sprite('assets/images/editor_gamepad_map.png', 250, 140);
@@ -80,20 +85,29 @@ var bulletUp = new Sprite('assets/images/bullet_up.png', 8, 8);
 var battleCity = new Sprite('assets/images/battle_city.png', 376, 136);
 var gameOver = new Sprite('assets/images/game_over.png', 248, 160);
 
+
+/*keyhandling */
 document.addEventListener('keydown', function (e) {
   keylog[e.keyCode] = {
     pressed: true,
     handled: false
   };
-
 });
+
+document.addEventListener('keyup', function (e) {
+  keylog[e.keyCode] = {
+    pressed: false,
+    handled: true
+  };
+  // keylog[e.keyCode]['handled'] = true;
+})
 
 var interval;
 
 var gamepadConnected = false;
 var gamepadHandled = false;
 
-
+/*poll the state of the gampepad */
 function pollGamepads() {
   var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
   for (var i = 0; i < gamepads.length; i++) {
@@ -104,17 +118,11 @@ function pollGamepads() {
   }
 }
 
-document.addEventListener('keyup', function (e) {
-  keylog[e.keyCode] = {
-    pressed: false,
-    handled: true
-  };
-  // keylog[e.keyCode]['handled'] = true;
-})
-
 document.addEventListener('DOMContentLoaded', function () {
   canvas = new Canvas('canvas');
 })
+
+/*Check gamepad is connected or not */
 window.addEventListener("gamepaddisconnected", function () {
   gamepadConnected = false;
 });
@@ -135,6 +143,7 @@ function randomGenerator(start, end) {
   return Math.floor(Math.random() * (end - start + 1)) + start;
 }
 
+/*Run the initital screen with options */
 var initAll = function () {
   canvas.context.clearRect(0, 0, 550, 620);
   battleCity.draw(62, 50);
@@ -153,6 +162,7 @@ var initAll = function () {
   });
 }
 
+/*show which option is higlighted */
 var landingView = function (tankPosition) {
   var stop = false;
   var gp = pollGamepads();
@@ -162,22 +172,32 @@ var landingView = function (tankPosition) {
   now = Date.now();
   elapsed = now - then;
   if (elapsed > fpsInterval) {
+
     canvas.context.clearRect(135, tankPosition - 16, 32, 32);
     canvas.context.clearRect(0, 450, 550, 600);
     homekey.draw(25, 450);
+
     if (gamepadConnected) gamepadHome.draw(300, 450);
+
     then = now - (elapsed % fpsInterval);
+
+    //move selection down
     if (((!keylog[38].handled && keylog[38].pressed) || (gamepadConnected && gp.axes[1] < -.99 && !gamepadHandled)) && tankPosition != 250) {
       tankPosition -= 50;
       gamepadConnected ? gamepadHandled = true : null;
       keylog[38].handled = true;
     }
+
+    //move selection up
     if (((!keylog[40].handled && keylog[40].pressed) || (gamepadConnected && gp.axes[1] > .99 && !gamepadHandled)) && tankPosition != 400) {
       tankPosition += 50;
       gamepadConnected ? gamepadHandled = true : null;
       keylog[40].handled = true;
     }
+
     tankRight.drawAnimated(135, tankPosition - 16, [0, 1]);
+
+    /*Check which option is selected when enter is pressed */
     if ((keylog[13].pressed && !keylog[13].handled) || (gamepadConnected && gp.buttons[0].pressed)) {
       if (tankPosition === 350) {
         cancelAnimationFrame(landingAnimation);
