@@ -24,7 +24,7 @@ var Player = function () {
           currTankImage = tankLeft;
           break;
       }
-      currTankImage.drawMoving(this.tankPosition[0] + PADD, this.tankPosition[1] + PADD, [0, 1]);
+      currTankImage.drawAnimated(this.tankPosition[0] + PADD, this.tankPosition[1] + PADD, [0, 1]);
     }
   }
 

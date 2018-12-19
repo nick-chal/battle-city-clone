@@ -125,7 +125,7 @@ var Game = function (second) {
     if (enemyLeft <= 0) {
       if (!gameoverCounter) gameoverCounter = 1;
       if (gameoverCounter >= 100) {
-        if (stage < 5) {
+        if (stage < 6) {
           player = null;
           if (secondPlayer) player2 = null;
           var mapLoad = stages[stage + 1].map(function (item) {
