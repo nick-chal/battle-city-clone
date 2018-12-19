@@ -17,6 +17,7 @@ var proxyHandler = {
 };
 
 var keylog = new Proxy({}, proxyHandler);
+var mapType = new Sprite('assets/images/editor_active.png', 32, 220)
 var brick = new Sprite('assets/images/wall_brick.png', 16, 16);
 var steel = new Sprite('assets/images/wall_steel.png', 16, 16);
 var tree = new Sprite('assets/images/tree.png', 16, 16);
@@ -29,6 +30,7 @@ var tankLeft = new Sprite('assets/images/tank_left.png', 32, 32);
 var tankDown = new Sprite('assets/images/tank_down.png', 32, 32);
 var tankUp = new Sprite('assets/images/tank_up.png', 32, 32);
 
+var enemyIcon = new Sprite('assets/images/enemy.png', 16, 16);
 var tank2Right = new Sprite('assets/images/tank_player2_right.png', 32, 32);
 var tank2Left = new Sprite('assets/images/tank_player2_left.png', 32, 32);
 var tank2Down = new Sprite('assets/images/tank_player2_down.png', 32, 32);
@@ -36,10 +38,22 @@ var tank2Up = new Sprite('assets/images/tank_player2_up.png', 32, 32);
 
 var creation = new Sprite('assets/images/create_sprite.png', 32, 32);
 
-var enemyUp = new Sprite('assets/images/enemy_up_1.png', 32, 32);
-var enemyDown = new Sprite('assets/images/enemy_down_1.png', 32, 32);
-var enemyRight = new Sprite('assets/images/enemy_right_1.png', 32, 32);
-var enemyLeft = new Sprite('assets/images/enemy_left_1.png', 32, 32);
+var enemySprite = {
+  enemyUp1: new Sprite('assets/images/enemy_up_1.png', 32, 32),
+  enemyDown1: new Sprite('assets/images/enemy_down_1.png', 32, 32),
+  enemyRight1: new Sprite('assets/images/enemy_right_1.png', 32, 32),
+  enemyLeft1: new Sprite('assets/images/enemy_left_1.png', 32, 32),
+
+  enemyUp2: new Sprite('assets/images/enemy_up_2.png', 32, 32),
+  enemyDown2: new Sprite('assets/images/enemy_down_2.png', 32, 32),
+  enemyRight2: new Sprite('assets/images/enemy_right_2.png', 32, 32),
+  enemyLeft2: new Sprite('assets/images/enemy_left_2.png', 32, 32),
+
+  enemyUp3: new Sprite('assets/images/enemy_up_3.png', 32, 32),
+  enemyDown3: new Sprite('assets/images/enemy_down_3.png', 32, 32),
+  enemyRight3: new Sprite('assets/images/enemy_right_3.png', 32, 32),
+  enemyLeft3: new Sprite('assets/images/enemy_left_3.png', 32, 32),
+}
 
 var bulletRight = new Sprite('assets/images/bullet_right.png', 8, 8);
 var bulletLeft = new Sprite('assets/images/bullet_left.png', 8, 8);
@@ -104,6 +118,7 @@ window.addEventListener("gamepadconnected", function () {
 
 
 var landingAnimation;
+var game;
 
 window.onload = function () {
   initAll();
@@ -114,7 +129,7 @@ function randomGenerator(start, end) {
 }
 
 var initAll = function () {
-  canvas.context.clearRect(0, 0, 500, 500);
+  canvas.context.clearRect(0, 0, 550, 620);
   battleCity.draw(62, 50);
   canvas.context.font = '16px prstart';
   canvas.context.fillStyle = 'white';
@@ -161,13 +176,19 @@ var landingView = function (tankPosition) {
         stop = true;
       } else if (tankPosition === 300) {
         canvas.context.clearRect(0, 0, 500, 500);
-        var mapLoad = JSON.parse(JSON.stringify(stages));
-        new Game(mapLoad[1], true, 1).init();
+        var mapLoad = stages[1].map(function (item) {
+          return item.slice();
+        });
+        game = new Game(true);
+        game.init(mapLoad);
         stop = true;
       } else if (tankPosition === 250) {
         canvas.context.clearRect(0, 0, 500, 500);
-        var mapLoad = JSON.parse(JSON.stringify(stages));
-        new Game(mapLoad[1], false, 1).init();
+        var mapLoad = stages[1].map(function (item) {
+          return item.slice();
+        });
+        game = new Game(false);
+        game.init(mapLoad);
         stop = true;
       }
       keylog[13].handled = true;

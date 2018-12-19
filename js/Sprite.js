@@ -27,7 +27,7 @@ var Sprite = function (filename, width, height) {
 
   this.drawAnimated = function (x, y, spriteSheetIndex) {
     updateAnimationFrame(spriteSheetIndex);
-    var resX = this.animationCurrentFrame % 2;
+    var resX = this.animationCurrentFrame % 4;
     canvas.context.drawImage(this.image, resX * this.S_WIDTH, 0, this.S_WIDTH, this.S_WIDTH, x, y, this.S_WIDTH, this.S_HEIGHT);
   };
 

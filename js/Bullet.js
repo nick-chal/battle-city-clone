@@ -52,7 +52,10 @@ var Bullet = function (direction, position, owner) {
         map[wall1[1]][wall1[0]] = 0;
         break;
       case 5:
-        map[wall1[1]][wall1[0]] = 6;
+        map[24][12] = 6;
+        map[24][13] = 6;
+        map[25][13] = 6;
+        map[25][12] = 6;
         break;
     }
     switch (map[wall2[1]][wall2[0]]) {
@@ -60,7 +63,10 @@ var Bullet = function (direction, position, owner) {
         map[wall2[1]][wall2[0]] = 0;
         break;
       case 5:
-        map[wall2[1]][wall2[0]] = 6;
+        map[24][12] = 6;
+        map[24][13] = 6;
+        map[25][13] = 6;
+        map[25][12] = 6;
         break;
     }
   }

@@ -1,7 +1,7 @@
 var Player2 = function () {
   this.direction = 'up';
   this.tankPosition = [16 * 16, 24 * 16];
-  this.bulletFired = false;
+  this.bulletFired = true;
   this.startAnimationCounter = 0
   var that = this;
 

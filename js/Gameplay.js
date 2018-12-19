@@ -1,22 +1,41 @@
-var Game = function (mapLoad, second, stageNum = 1) {
-  var map = mapLoad;
-  var player;
-  var player2;
-  var enemy = [];
+var Game = function (second) {
+  var map
+  var player = null;
+  var player2 = null;
   var secondPlayer = second;
-  var enemyBullet = [];
-  var playerBullet = null;
-  var player2Bullet = null;
-  var enemyLimit = 10;
-  var enemyKilled = 0;
-  var enemyCounter = 0;
-  var enemyLives = 0;
+  var player1Lives = 2;
+  var player2Lives = secondPlayer ? 2 : -1;
+  var player1Score = 0;
+  var player2Score = 0;
+  var enemy = [];
+  var enemyBullet;
+  var playerBullet;
+  var player2Bullet;
+  var enemyLimit;
+  var enemyLeft;
+  var enemyCounter;
+  var enemyLives;
+  var pause;
+  var gameoverCounter = null;
+  // var stageoverCounter = null;
 
-  var stage = stageNum;
+  var stage;
 
-  this.init = function () {
-    player = new Player();
-    if (secondPlayer) player2 = new Player2();
+  this.init = function (mapLoad, stageNum = 1) {
+    map = mapLoad;
+    enemy = [];
+    enemyBullet = [];
+    playerBullet = null;
+    player2Bullet = null;
+    enemyLimit = 5;
+    enemyKilled = 0;
+    enemyCounter = 0;
+    enemyLives = 0;
+    enemyLeft = enemyLimit;
+    stage = stageNum;
+    gameoverCounter = 0;
+    // player = new Player();
+    // if (secondPlayer) player2 = new Player2();
     then = Date.now();
     startTime = then;
     sound.start.play();
@@ -28,15 +47,17 @@ var Game = function (mapLoad, second, stageNum = 1) {
   var runGame = function () {
     var stop = false;
     now = Date.now();
-    // console.log('app');
-    var gamepad = {};
 
+    if (!keylog[13].handled && keylog[13].pressed) {
+      pause = !pause;
+      keylog[13].handled = true;
+    }
     elapsed = now - then;
-    if (elapsed > fpsInterval) {
-      gamepad = pollGamepads();
+    if (elapsed > fpsInterval && !pause) {
+      if (gameoverCounter) gameoverCounter++;
       then = now - (elapsed % fpsInterval);
       if (enemyCounter % 100 == 0) {
-        if (enemyLives < 4 && enemyCounter / 100 <= enemyLimit) {
+        if (enemyLives < 4 && enemyCounter / 100 < enemyLimit) {
           enemy.push(new Enemy());
           enemyLives++;
           enemyCounter++;
@@ -45,184 +66,216 @@ var Game = function (mapLoad, second, stageNum = 1) {
         enemyCounter++;
       }
       clearMap();
-      if (player === null) player = new Player();
-      if (secondPlayer && player2 == null) player2 = new Player2();
-      player.updateTank(map, enemy, gamepad);
-      player.drawTank();
-      if (player !== null && player.checkBulletFired(gamepad)) {
-        var position;
-        switch (player.direction) {
-          case 'up':
-            position = [player.tankPosition[0] + 8, player.tankPosition[1]];
-            break;
-          case 'down':
-            position = [player.tankPosition[0] + 8, player.tankPosition[1] + 16];
-            break;
-          case 'right':
-            position = [player.tankPosition[0], player.tankPosition[1] + 8];
-            break;
-          case 'left':
-            position = [player.tankPosition[0], player.tankPosition[1] + 8];
-            break;
-        }
-        playerBullet = new Bullet(player.direction, position, 0);
-        sound.bullet.play();
-      }
-
-      if (secondPlayer) {
-        if (player2 === null) {
-          player2 = new Player();
-        }
-        player2.updateTank(map, enemy);
-        player2.drawTank();
-        if (player2 !== null && player2.checkBulletFired()) {
-          var position;
-          switch (player2.direction) {
-            case 'up':
-              position = [player2.tankPosition[0] + 8, player2.tankPosition[1]];
-              break;
-            case 'down':
-              position = [player2.tankPosition[0] + 8, player2.tankPosition[1] + 16];
-              break;
-            case 'right':
-              position = [player2.tankPosition[0], player2.tankPosition[1] + 8];
-              break;
-            case 'left':
-              position = [player2.tankPosition[0], player2.tankPosition[1] + 8];
-              break;
-          }
-          player2Bullet = new Bullet(player2.direction, position, 0);
-          sound.bullet.play();
-        }
-      }
-
+      drawInfo();
+      if (player === null && player1Lives >= 0) player = new Player();
+      if (secondPlayer && player2 === null && player2Lives >= 0) player2 = new Player2();
+      if (player !== null) playerUpdates(player, 1);
+      if (secondPlayer && player2 !== null) playerUpdates(player2, 2);
       for (var i = 0; i < enemy.length; i++) {
-        enemy[i].updateTank(map, enemy, i, player);
-        enemy[i].drawTank();
-        if (enemy[i].checkBulletFired()) {
-          var position;
-          switch (enemy[i].direction) {
-            case 'up':
-              position = [enemy[i].tankPosition[0] + 8, enemy[i].tankPosition[1]];
-              break;
-            case 'down':
-              position = [enemy[i].tankPosition[0] + 8, enemy[i].tankPosition[1] + 16];
-              break;
-            case 'right':
-              position = [enemy[i].tankPosition[0], enemy[i].tankPosition[1] + 8];
-              break;
-            case 'left':
-              position = [enemy[i].tankPosition[0], enemy[i].tankPosition[1] + 8];
-              break;
-          }
-          enemyBullet[i] = (new Bullet(enemy[i].direction, position, 1));
-        }
+        enemyUpdates(i);
         if (enemyBullet[i]) {
           if (!enemyBullet[i].destroyed) {
             enemyBullet[i].drawBullet();
             enemyBullet[i].updateBullet(map);
-            if (player != null && enemyBullet[i].tankDetection(player)) {
-              player = null;
-            }
-            if (player !== null && playerBullet != null) {
-              if (enemyBullet[i].bulletBulletCollision(playerBullet.bulletPosition)) {
-                enemyBullet[i] = null;
-                player.bulletFired = false;
-                enemy[i].bulletFired = false;
-                playerBullet = null;
-              }
+            enemyBulletCheck(player, i, 1);
+            if (secondPlayer && enemyBullet[i] != null && !enemyBullet[i].destroyed) {
+              enemyBulletCheck(player2, i, 2);
             }
           } else {
             enemyBullet[i] = null;
             enemy[i].bulletFired = false;
           }
         }
-        if (secondPlayer) {
-          if (enemyBullet[i]) {
-            if (!enemyBullet[i].destroyed) {
-              if (player2 != null && enemyBullet[i].tankDetection(player2)) {
-                player2 = null;
-              }
-              if (player2 !== null && player2Bullet != null) {
-                if (enemyBullet[i].bulletBulletCollision(player2Bullet.bulletPosition)) {
-                  enemyBullet[i] = null;
-                  player2.bulletFired = false;
-                  enemy[i].bulletFired = false;
-                  player2Bullet = null;
-                }
-              }
-            } else {
-              enemyBullet[i] = null;
-              enemy[i].bulletFired = false;
-            }
-          }
-        }
-        if (playerBullet != null) {
-          if (playerBullet.tankDetection(enemy[i])) {
-            enemy.splice(i, 1);
-            sound.explosionTank.play();
-            enemyBullet.splice(i, 1);
-            enemyLives--;
-            enemyKilled++;
-          }
-        }
-        if (secondPlayer) {
-          if (player2Bullet != null) {
-            if (player2Bullet.tankDetection(enemy[i])) {
-              enemy.splice(i, 1);
-              sound.explosionTank.play();
-              enemyBullet.splice(i, 1);
-              enemyLives--;
-              enemyKilled++;
-            }
-          }
+
+        if (enemy.length >= 0) playerBulletEnemyCheck(playerBullet, i, 1);
+        if (secondPlayer && enemy.length >= 0) {
+          playerBulletEnemyCheck(player2Bullet, i, 2);
         }
       }
-      if (map[24][12] == 6 || map[24][13] == 6 || map[25][13] == 6 || map[25][12] == 6) {
-        stop = true;
-        sound.explosionBase.play();
-      }
-      drawMap(map);
-      if (playerBullet != null) {
-        if (!playerBullet.destroyed) {
-          playerBullet.drawBullet();
-          playerBullet.updateBullet(map);
-        } else {
-          playerBullet = null;
-          if (player !== null) player.bulletFired = false;
-        }
-      }
+
+
+      playerBulletUpdates(playerBullet, 1);
       if (secondPlayer) {
-        if (player2Bullet != null) {
-          if (!player2Bullet.destroyed) {
-            player2Bullet.drawBullet();
-            player2Bullet.updateBullet(map);
-          } else {
-            player2Bullet = null;
-            if (player2 !== null) player2.bulletFired = false;
-          }
+        playerBulletUpdates(player2Bullet, 2);
+      }
+    }
+    drawMap(map);
+
+    if (player1Lives < 0 && player2Lives < 0) {
+      stop = gameOverScreen();
+    }
+
+    if (map[24][12] == 6 || map[24][13] == 6 || map[25][13] == 6 || map[25][12] == 6) {
+      if (!gameoverCounter) sound.explosionBase.play();
+      stop = gameOverScreen();
+    }
+    if (enemyLeft <= 0) {
+      if (!gameoverCounter) gameoverCounter = 1;
+      if (gameoverCounter >= 100) {
+        if (stage < 5) {
+          player = null;
+          if (secondPlayer) player2 = null;
+          var mapLoad = stages[stage + 1].map(function (item) {
+            return item.slice();
+          });
+          game.init(mapLoad, stage + 1);
+          return;
+        } else {
+          stop = true;
         }
       }
     }
-    if (keylog[13] && !keylog[13].handled && keylog[13].pressed) {
-      stop = true;
-    }
-    // if(enemyKilled >= enemyLimit){
-    // }
     if (!stop) {
       requestAnimationFrame(runGame);
     } else {
-
-      setTimeout(function () {
-        canvas.context.clearRect(0, 0, 500, 500)
-        gameOver.draw(116, 200);
-        sound.over.play();
-        setTimeout(initAll, 2500);
-      }, 1500);
-
+      canvas.context.clearRect(0, 0, 550, 620)
+      gameOver.draw(116, 200);
+      sound.over.play();
+      setTimeout(initAll, 2500);
     }
   }
 
 
+  playerUpdates = function (player, playerNumber) {
+    gp = pollGamepads()
+    player.updateTank(map, enemy, gp);
+    player.drawTank();
+    if (player !== null && player.checkBulletFired(gp)) {
+      var position;
+      switch (player.direction) {
+        case 'up':
+          position = [player.tankPosition[0] + 8, player.tankPosition[1]];
+          break;
+        case 'down':
+          position = [player.tankPosition[0] + 8, player.tankPosition[1] + 16];
+          break;
+        case 'right':
+          position = [player.tankPosition[0], player.tankPosition[1] + 8];
+          break;
+        case 'left':
+          position = [player.tankPosition[0], player.tankPosition[1] + 8];
+          break;
+      }
+      if (playerNumber == 1) playerBullet = new Bullet(player.direction, position, 0);
+      else if (playerNumber == 2) player2Bullet = new Bullet(player.direction, position, 0);
+      sound.bullet.play();
+    }
+  }
+
+  enemyUpdates = function (i) {
+    enemy[i].updateTank(map, enemy, i, player);
+    enemy[i].drawTank();
+    if (enemy[i].checkBulletFired()) {
+      var position;
+      switch (enemy[i].direction) {
+        case 'up':
+          position = [enemy[i].tankPosition[0] + 8, enemy[i].tankPosition[1]];
+          break;
+        case 'down':
+          position = [enemy[i].tankPosition[0] + 8, enemy[i].tankPosition[1] + 16];
+          break;
+        case 'right':
+          position = [enemy[i].tankPosition[0], enemy[i].tankPosition[1] + 8];
+          break;
+        case 'left':
+          position = [enemy[i].tankPosition[0], enemy[i].tankPosition[1] + 8];
+          break;
+      }
+      enemyBullet[i] = (new Bullet(enemy[i].direction, position, 1));
+    }
+  }
+
+  enemyBulletCheck = function (playerTank, i, playerNumber) {
+    if (playerTank != null && enemyBullet[i].tankDetection(playerTank)) {
+      playerTank = null;
+      playerNumber == 1 ? player = null : player2 = null;
+      playerNumber == 1 ? player1Lives-- : player2Lives--;
+    }
+    plBullet = playerNumber == 1 ? playerBullet : player2Bullet;
+    if (playerTank !== null && plBullet !== null) {
+      if (enemyBullet[i].bulletBulletCollision(plBullet.bulletPosition)) {
+        enemyBullet[i] = null;
+        playerNumber == 1 ? player.bulletFired = false : player2.bulletFired = false;
+        enemy[i].bulletFired = false;
+        playerNumber == 1 ? playerBullet = null : player2Bullet = null;
+      }
+    }
+  }
+
+  playerBulletEnemyCheck = function (plBullet, i, playerNum) {
+    if (plBullet != null && enemy[i]) {
+      if (plBullet.tankDetection(enemy[i])) {
+        enemy[i].life--;
+        if (enemy[i].life <= 0) {
+          if (enemy[i].tankSpeed == 1) var score = 100;
+          else if (enemy[i].tankSpeed == 0.75) var score = 200;
+          else if (enemy[i].tankSpeed == 1.75) var score = 300;
+          enemy.splice(i, 1);
+          sound.explosionTank.play();
+          enemyBullet.splice(i, 1);
+          enemyLives--;
+          enemyLeft--;
+          playerNum === 1 ? player1Score += score : player2Score += score;
+        } else {
+          sound.bulletWall.play();
+        }
+      }
+    }
+  }
+
+  playerBulletUpdates = function (plBullet, playerNum) {
+    if (plBullet != null) {
+      if (!plBullet.destroyed) {
+        plBullet.drawBullet();
+        plBullet.updateBullet(map);
+      } else {
+        plBullet = null;
+        playerNum === 1 ? playerBullet = null : player2Bullet = null;
+        if (playerNum === 1 && player !== null) player.bulletFired = false;
+        else if (playerNum === 2 && player2 !== null) player2.bulletFired = false;
+      }
+    }
+  }
+
+  drawInfo = function () {
+    canvas.context.font = '10px prstart';
+    canvas.context.fillStyle = 'black';
+    canvas.context.textBaseline = 'top';
+    canvas.context.fillText('LIVES: ' + (player1Lives >= 0 ? player1Lives : 'X'), 30 + 42, 10);
+    canvas.context.fillText('SCORE: ' + player1Score, 30 + 42, 30);
+    canvas.context.fillText('ENEMIES', 470, 45);
+
+    if (secondPlayer) {
+      canvas.context.fillText('LIVES: ' + (player2Lives >= 0 ? player2Lives : 'X'), 348 + 30, 10);
+      canvas.context.fillText('SCORE: ' + player2Score, 348 + 30, 30);
+    }
+    canvas.context.font = '13px prstart';
+    canvas.context.fillText('STAGE:' + stage, 210, 20);
+    canvas.context.fillText('P1', 42, 20);
+    secondPlayer ? canvas.context.fillText('P2', 348, 20) : null;
+    var xpos = 485;
+    var ypos = 70;
+    for (var i = 0; i <= (enemyLeft - enemyLives); i++) {
+      if ((i) >= (enemyLeft - enemyLives)) break;
+      enemyIcon.draw(xpos, ypos);
+      xpos += 20;
+      if ((i + 1) % 2 == 0) {
+        ypos += 20;
+        xpos = 485;
+      }
+    }
+  }
+
+  gameOverScreen = function () {
+    canvas.context.font = '20px prstart';
+    canvas.context.fillStyle = 'red';
+    canvas.context.textBaseline = 'top';
+    canvas.context.fillText('GAME OVER', 170, 200);
+    if (!gameoverCounter) gameoverCounter = 1;
+    if (gameoverCounter >= 100) {
+      return true;
+    }
+    return false;
+  }
 
 }

@@ -37,6 +37,7 @@ var Editor = function () {
     if (elapsed > fpsInterval) {
       clearMap();
       drawMap(map);
+      editorActive();
       gamepadHandled = gamepadCounter % 5 === 0 ? false : true;
       gamepadCounter++;
       tankEditor.draw(tankPosition[0] + PADD, tankPosition[1] + PADD);
@@ -108,7 +109,8 @@ var Editor = function () {
         stop = true;
         console.log(JSON.stringify(map));
         clearMap();
-        new Game(map, false).init();
+        game = new Game(false);
+        game.init(map);
         tankEditor.draw(8 * 16 + PADD, 24 * 16 + PADD);
         keylog[13].handled = true;
       }
@@ -122,6 +124,17 @@ var Editor = function () {
       });
     }
 
+  }
+
+  editorActive = function () {
+    canvas.context.font = '10px prstart';
+    canvas.context.fillStyle = 'black';
+    canvas.context.textBaseline = 'top';
+    canvas.context.fillText('ACTIVE', 475, 45);
+    canvas.context.fillText('TILE', 485, 60);
+    canvas.context.fillStyle = 'red';
+    canvas.context.fillRect(485, 82 + (47 * (itemCounter % 5)), 38, 38);
+    mapType.draw(488, 85);
   }
 
 

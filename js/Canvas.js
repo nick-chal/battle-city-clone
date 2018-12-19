@@ -7,7 +7,7 @@ var Canvas = function (canvas_id) {
 
 function clearMap() {
   canvas.context.fillStyle = 'gray';
-  canvas.context.fillRect(0, 0, 500, 500);
+  canvas.context.fillRect(0, 0, 550, 620);
   canvas.context.clearRect(42, 42, 500 - 84, 500 - 84);
 }
 
