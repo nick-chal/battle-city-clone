@@ -1,6 +1,4 @@
-var Enemy = function (enemy) {
-  this.direction = 'down';
-  this.change = 'down';
+var Enemy = function (pvp) {
   this.tankDestroyed = false;
   this.bulletFired = true;
   var temp = randomGenerator(0, 10);
@@ -24,17 +22,32 @@ var Enemy = function (enemy) {
   this.startAnimationCounter = 0;
   var ok = false;
 
-  var generationSpot = randomGenerator(1, 3);
+  var generationSpot = pvp ? randomGenerator(1, 2) : randomGenerator(1, 3);
   switch (generationSpot) {
     case 1:
-      this.tankPosition = [0, 0];
+      this.tankPosition = pvp ? [0, 12 * 16] : [0, 0];
       break;
     case 2:
-      this.tankPosition = [12 * 16, 0];
+      this.tankPosition = pvp ? [24 * 16, 12 * 16] : [12 * 16, 0];
       break;
     case 3:
       this.tankPosition = [24 * 16, 0];
       break;
+  }
+
+  if (pvp) {
+    if (this.tankPosition[0] == 0) {
+      this.direction = 'up';
+      this.change = 'up';
+    } else {
+      this.direction = 'down';
+      this.change = 'down';
+    }
+  } else {
+    {
+      this.direction = 'down';
+      this.change = 'down';
+    }
   }
 
   this.allEnemyCheck = function (enemyList, index, player) {

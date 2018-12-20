@@ -153,7 +153,7 @@ var initAll = function () {
   canvas.context.fillText('1 PLAYER', 175, 250);
   canvas.context.fillText('2 PLAYERS', 175, 300);
   canvas.context.fillText('CONSTRUCTION', 175, 350);
-  canvas.context.fillText('SAVED LEVELS', 175, 400);
+  canvas.context.fillText('PLAYER VS PLAYER', 175, 400);
   var tankPosition = 250;
   then = Date.now();
   startTime = then;
@@ -209,7 +209,7 @@ var landingView = function (tankPosition) {
         var mapLoad = stages[1].map(function (item) {
           return item.slice();
         });
-        game = new Game(true);
+        game = new Game(true, false);
         game.init(mapLoad);
         stop = true;
       } else if (tankPosition === 250) {
@@ -217,7 +217,15 @@ var landingView = function (tankPosition) {
         var mapLoad = stages[1].map(function (item) {
           return item.slice();
         });
-        game = new Game(false);
+        game = new Game(false, false);
+        game.init(mapLoad);
+        stop = true;
+      } else if (tankPosition === 400) {
+        canvas.context.clearRect(0, 0, 500, 500);
+        var mapLoad = pvpStage.map(function (item) {
+          return item.slice();
+        });
+        game = new Game(true, true);
         game.init(mapLoad);
         stop = true;
       }

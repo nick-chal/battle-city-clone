@@ -1,10 +1,10 @@
-var Game = function (second) {
+var Game = function (second, pvp) {
   var map
   var player = null;
   var player2 = null;
   var secondPlayer = second;
   var player1Lives = 2;
-  var player2Lives = secondPlayer ? 2 : -1;
+  var player2Lives = secondPlayer ? 2 : -1; //setting initial lives
   var player1Score = 0;
   var player2Score = 0;
   var enemy = [];
@@ -18,10 +18,11 @@ var Game = function (second) {
   var pause;
   var pauseHandled
   var gameoverCounter = null;
-  var maxEnemyScreen = 4;
-
-
+  var maxEnemyScreen = 4; //max enemy at once
+  var pvp = pvp;
   var stage;
+  var winnerBase = null;
+  var pvpGO = false; //doesnt let scoreboard change after gameover
 
   this.init = function (mapLoad, stageNum = 1) {
     map = mapLoad;
@@ -55,14 +56,21 @@ var Game = function (second) {
       keylog[13].handled = true;
     }
     elapsed = now - then;
+    if (gameoverCounter) {
+      canvas.context.globalAlpha = 0.2;
+      canvas.context.fillStyle = 'gray';
+      canvas.context.fillRect(42, 42, 416, 416);
+    }
 
     if (elapsed > fpsInterval && !pause) { //checking fps
-      if (gameoverCounter) gameoverCounter++;
+      if (gameoverCounter) {
+        gameoverCounter++;
+      }
       then = now - (elapsed % fpsInterval);
 
-      if (enemyCounter % 100 == 0) {
+      if (enemyCounter % 100 == 0) { //spawn enemy every 100 frames
         if (enemyLives < maxEnemyScreen && enemyCounter / 100 < enemyLimit) {
-          enemy.push(new Enemy());
+          enemy.push(new Enemy(pvp));
           enemyLives++;
           enemyCounter++;
         }
@@ -75,11 +83,11 @@ var Game = function (second) {
       keyMapping();
 
       if (player === null && player1Lives >= 0) player = new Player(); //create player after killed
-      if (secondPlayer && player2 === null && player2Lives >= 0) player2 = new Player2();
+      if (secondPlayer && player2 === null && player2Lives >= 0) player2 = new Player2(pvp);
       if (player !== null) playerUpdates(player, 1);
       if (secondPlayer && player2 !== null) playerUpdates(player2, 2);
 
-      /*Update all enemies and thei bullets */
+      /*Update all enemies and their bullets */
       for (var i = 0; i < enemy.length; i++) {
         enemyUpdates(i);
         if (enemyBullet[i]) {
@@ -112,37 +120,59 @@ var Game = function (second) {
     drawMap(map);
 
     /*Check if both players are out of life */
-    if (player1Lives < 0 && player2Lives < 0) {
-      stop = gameOverScreen();
+    if (pvp) {
+      if (player1Lives < 0 || player2Lives < 0) {
+        stop = gameOverScreen();
+      }
+    } else {
+      if (player1Lives < 0 && player2Lives < 0) {
+        stop = gameOverScreen();
+      }
+    }
+    /*Check if base is destroyed */
+    if (pvp) {
+      if (!pvpGO) {
+        if (map[0][12] == 6 || map[0][13] == 6 || map[1][13] == 6 || map[1][12] == 6) {
+          if (!gameoverCounter) sound.explosionBase.play();
+          stop = gameOverScreen();
+          winnerBase = 1;
+        } else if (map[24][12] == 6 || map[24][13] == 6 || map[25][13] == 6 || map[25][12] == 6) {
+          if (!gameoverCounter) sound.explosionBase.play();
+          stop = gameOverScreen();
+          winnerBase = 2;
+        }
+      } else if (winnerBase) stop = gameOverScreen();
+    } else {
+      if (map[24][12] == 6 || map[24][13] == 6 || map[25][13] == 6 || map[25][12] == 6) {
+        if (!gameoverCounter) sound.explosionBase.play();
+        stop = gameOverScreen();
+      }
     }
 
-    /*Check if base is destroyed */
-    if (map[24][12] == 6 || map[24][13] == 6 || map[25][13] == 6 || map[25][12] == 6) {
-      if (!gameoverCounter) sound.explosionBase.play();
-      stop = gameOverScreen();
-    }
     /*Check all enemies are killed */
     if (enemyLeft <= 0) {
       if (!gameoverCounter) gameoverCounter = 1;
-      if (gameoverCounter >= 100) {
-        if (stage < 6) {
-          player = null;
-          if (secondPlayer) player2 = null;
-          var mapLoad = stages[stage + 1].map(function (item) {
-            return item.slice();
-          });
-          game.init(mapLoad, stage + 1);
-          return;
-        } else {
-          stop = true;
+      if (!pvp) { //check if load new stage or gameOver
+        if (gameoverCounter >= 100) {
+          if (stage < 6) {
+            player = null;
+            if (secondPlayer) player2 = null;
+            var mapLoad = stages[stage + 1].map(function (item) {
+              return item.slice();
+            });
+            game.init(mapLoad, stage + 1);
+            return;
+          } else {
+            stop = true;
+          }
         }
-      }
+      } else stop = gameOverScreen();
     }
 
     if (!stop) {
       requestAnimationFrame(runGame);
     } else {
-      canvas.context.clearRect(0, 0, 550, 620)
+      canvas.context.clearRect(0, 0, 550, 620);
       gameOver.draw(116, 200);
       sound.over.play();
       setTimeout(initAll, 2500);
@@ -156,7 +186,7 @@ var Game = function (second) {
     player.drawTank();
     if (player !== null && player.checkBulletFired(gp)) {
       var position;
-      switch (player.direction) {
+      switch (player.direction) { //the extra numbers help to set the origin of bullet to nuzzle of tank
         case 'up':
           position = [player.tankPosition[0] + 8, player.tankPosition[1]];
           break;
@@ -182,7 +212,7 @@ var Game = function (second) {
     enemy[i].drawTank();
     if (enemy[i].checkBulletFired()) {
       var position;
-      switch (enemy[i].direction) {
+      switch (enemy[i].direction) { //the extra numbers help to set the origin of bullet to nuzzle of tank
         case 'up':
           position = [enemy[i].tankPosition[0] + 8, enemy[i].tankPosition[1]];
           break;
@@ -202,7 +232,7 @@ var Game = function (second) {
 
   /*Check if enemy bullet hits the player 1 or 2 also bullet-bullet collision of enemy and player */
   enemyBulletCheck = function (playerTank, i, playerNumber) {
-    if (playerTank != null && enemyBullet[i].tankDetection(playerTank)) {
+    if (playerTank != null && enemyBullet[i].tankDetection(playerTank) && !pvpGO) {
       playerTank = null;
       playerNumber == 1 ? player = null : player2 = null;
       playerNumber == 1 ? player1Lives-- : player2Lives--;
@@ -224,7 +254,7 @@ var Game = function (second) {
       if (plBullet.tankDetection(enemy[i])) {
         enemy[i].life--;
         if (enemy[i].life <= 0) {
-          if (enemy[i].tankSpeed == 1) var score = 100;
+          if (enemy[i].tankSpeed == 1) var score = 100; //identifying type of enemy
           else if (enemy[i].tankSpeed == 0.75) var score = 200;
           else if (enemy[i].tankSpeed == 1.75) var score = 300;
           enemy.splice(i, 1);
@@ -237,12 +267,21 @@ var Game = function (second) {
           sound.bulletWall.play();
         }
       }
+      if (pvp && !pvpGO) {
+        var tank = playerNum === 1 ? player2 : player;
+        if (tank != null && plBullet.tankDetection(tank)) {
+          sound.explosionTank.play();
+          playerNum === 1 ? player1Score += 500 : player2Score += 500;
+          playerNum === 2 ? player = null : player2 = null;
+          playerNum === 2 ? player1Lives-- : player2Lives--;
+        }
+      }
     }
   }
 
   /*Updating and drawing player 1 and 2 bullets */
   playerBulletUpdates = function (plBullet, playerNum) {
-    if (plBullet != null) {
+    if (plBullet != null && !pvpGO) {
       if (!plBullet.destroyed) {
         plBullet.drawBullet();
         plBullet.updateBullet(map);
@@ -292,14 +331,34 @@ var Game = function (second) {
     if (secondPlayer) p2Keymap.draw(320, 480);
   }
 
-  /*Drawing GameOver Text */
+  /*Drawing GameOver Text with scores and winner */
   gameOverScreen = function () {
+    canvas.context.globalAlpha = 1.0;
     canvas.context.font = '20px prstart';
     canvas.context.fillStyle = 'red';
     canvas.context.textBaseline = 'top';
     canvas.context.fillText('GAME OVER', 170, 200);
+    if (pvp) {
+      canvas.context.font = '12px prstart';
+      canvas.context.fillText('P1 SCORE: ' + player1Score, 150, 250);
+      if (secondPlayer) canvas.context.fillText('P2 SCORE: ' + player2Score, 150, 300);
+      if (winnerBase) canvas.context.fillText('PLAYER ' + winnerBase + " WON!!(DESTROYED BASE)", 100, 350);
+      else if ((player1Lives < 0 || player2Lives < 0) && (player1Lives !== player2Lives)) {
+        var winner = player1lives > player2Lives ? '1' : '2';
+        canvas.context.fillText('PLAYER ' + winner + " WON!!(OPPONENT NO LIVES LEFT)", 100, 350);
+      } else {
+        var winner = player1Score > player2Score ? '1' : '2';
+        if (player1Score !== player2Score) canvas.context.fillText('PLAYER ' + winner + " WON!!(HIGHER SCORE)", 100, 350);
+        else canvas.context.fillText('DRAW!! NONE WON', 150, 350);
+      }
+      pvpGO = true;
+    } else {
+      canvas.context.font = '15px prstart';
+      canvas.context.fillText('P1 SCORE: ' + player1Score, 150, 250);
+      if (secondPlayer) canvas.context.fillText('P2 SCORE: ' + player2Score, 150, 300);
+    }
     if (!gameoverCounter) gameoverCounter = 1;
-    if (gameoverCounter >= 100) {
+    if (gameoverCounter >= (pvp ? 250 : 120)) {
       return true;
     }
     return false;

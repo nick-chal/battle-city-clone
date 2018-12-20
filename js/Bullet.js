@@ -56,10 +56,17 @@ var Bullet = function (direction, position, owner) {
         map[wall1[1]][wall1[0]] = 0;
         break;
       case 5:
-        map[24][12] = 6;
-        map[24][13] = 6;
-        map[25][13] = 6;
-        map[25][12] = 6;
+        if (wall1[1] === 24 || wall1[1] === 25) {
+          map[24][12] = 6;
+          map[24][13] = 6;
+          map[25][13] = 6;
+          map[25][12] = 6;
+        } else {
+          map[0][12] = 6;
+          map[0][13] = 6;
+          map[1][13] = 6;
+          map[1][12] = 6;
+        }
         break;
     }
     switch (map[wall2[1]][wall2[0]]) {
@@ -67,10 +74,17 @@ var Bullet = function (direction, position, owner) {
         map[wall2[1]][wall2[0]] = 0;
         break;
       case 5:
-        map[24][12] = 6;
-        map[24][13] = 6;
-        map[25][13] = 6;
-        map[25][12] = 6;
+        if (wall2[1] === 24 || wall1[1] === 25) {
+          map[24][12] = 6;
+          map[24][13] = 6;
+          map[25][13] = 6;
+          map[25][12] = 6;
+        } else {
+          map[0][12] = 6;
+          map[0][13] = 6;
+          map[1][13] = 6;
+          map[1][12] = 6;
+        }
         break;
     }
   }
@@ -152,7 +166,6 @@ var Bullet = function (direction, position, owner) {
   /*check if bullet hits any tank(enemy->player or player->enemy) */
   this.tankDetection = function (tank) {
     if (tank.startAnimationCounter != undefined && tank.startAnimationCounter >= 120) {
-
       if (this.bulletPosition[0] <= tank.tankPosition[0] + 32 && this.bulletPosition[0] + 8 >= tank.tankPosition[0] && this.bulletPosition[1] <= tank.tankPosition[1] + 32 && this.bulletPosition[1] + 8 >= tank.tankPosition[1]) {
         this.destroyed = true;
         return true;

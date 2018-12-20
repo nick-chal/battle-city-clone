@@ -1,6 +1,7 @@
-var Player2 = function () {
+var Player2 = function (pvp) {
   this.direction = 'up';
-  this.tankPosition = [16 * 16, 24 * 16];
+
+  this.tankPosition = pvp ? [16 * 16, 0 * 16] : [16 * 16, 24 * 16];
   this.bulletFired = true;
   this.startAnimationCounter = 0
   var that = this;

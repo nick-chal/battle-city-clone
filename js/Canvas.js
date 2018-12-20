@@ -33,10 +33,12 @@ function drawMap(mapArray) {
           water.draw(xpos, ypos);
           break;
         case 5:
-          if (i == 24 && j == 12) base.draw(xpos, ypos);
+          if (i === 24 && j === 12) base.draw(xpos, ypos);
+          if (i === 0 && j === 12) base.draw(xpos, ypos);
           break;
         case 6:
-          if (i == 24 && j == 12) baseDestroyed.draw(xpos, ypos);
+          if (i === 24 && j === 12) baseDestroyed.draw(xpos, ypos);
+          if (i === 0 && j === 12) baseDestroyed.draw(xpos, ypos);
           break;
         default:
       }
