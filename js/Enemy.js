@@ -25,7 +25,7 @@ var Enemy = function (pvp) {
   var generationSpot = pvp ? randomGenerator(1, 2) : randomGenerator(1, 3);
   switch (generationSpot) {
     case 1:
-      this.tankPosition = pvp ? [0, 12 * 16] : [0, 0];
+      this.tankPosition = pvp ? [0 * 16, 12 * 16] : [0, 0];
       break;
     case 2:
       this.tankPosition = pvp ? [24 * 16, 12 * 16] : [12 * 16, 0];

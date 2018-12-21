@@ -109,13 +109,13 @@ var gamepadHandled = false;
 
 /*poll the state of the gampepad */
 function pollGamepads() {
+  var gp = [];
   var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
   for (var i = 0; i < gamepads.length; i++) {
-    var gp = gamepads[i];
-    if (gp) {
-      return gp;
-    }
+    if (gamepads[i])
+      gp.push(gamepads[i]);
   }
+  return gp;
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -124,12 +124,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /*Check gamepad is connected or not */
 window.addEventListener("gamepaddisconnected", function () {
-  gamepadConnected = false;
+  var gp = pollGamepads();
+  if (gp.length <= 0) gamepadConnected = false;
+  console.log('gpdisconn');
 });
 
 window.addEventListener("gamepadconnected", function () {
-  gamepadConnected = true;
+  var gp = pollGamepads();
+  if (gp.length > 0) gamepadConnected = true;
+  console.log('gpconn');
 });
+
+checkXBOX = function (gp) {
+  var temp;
+  for (var i = 0; i < gp.length; i++) {
+    if (gp[i].id === "Xbox 360 Controller (XInput STANDARD GAMEPAD)" && i !== 0) {
+      temp = gp[0];
+      gp[0] = gp[i];
+      gp[i] = temp;
+      return gp;
+    }
+  }
+  return gp;
+}
 
 
 var landingAnimation;
@@ -165,10 +182,14 @@ var initAll = function () {
 /*show which option is higlighted */
 var landingView = function (tankPosition) {
   var stop = false;
-  var gp = pollGamepads();
+  var gamepads = checkXBOX(pollGamepads());
+  var gp = gamepads[0];
   if (gamepadConnected) {
     if (gp.axes[1] < 0.1 && gp.axes[1] > -0.1) gamepadHandled = false;
   }
+  var gamepadButtonPressed = false;
+  if (gamepadConnected && (gp.buttons[0].pressed || gp.buttons[1].pressed || gp.buttons[2].pressed || gp.buttons[3].pressed))
+    gamepadButtonPressed = true;
   now = Date.now();
   elapsed = now - then;
   if (elapsed > fpsInterval) {
@@ -198,7 +219,7 @@ var landingView = function (tankPosition) {
     tankRight.drawAnimated(135, tankPosition - 16, [0, 1]);
 
     /*Check which option is selected when enter is pressed */
-    if ((keylog[13].pressed && !keylog[13].handled) || (gamepadConnected && gp.buttons[0].pressed)) {
+    if ((keylog[13].pressed && !keylog[13].handled) || (gamepadButtonPressed)) {
       if (tankPosition === 350) {
         cancelAnimationFrame(landingAnimation);
         canvas.context.clearRect(0, 0, 500, 500);

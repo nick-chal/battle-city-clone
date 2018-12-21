@@ -48,7 +48,8 @@ var Game = function (second, pvp) {
   var runGame = function () {
     var stop = false;
     now = Date.now();
-    var gp = pollGamepads();
+    var gamepads = checkXBOX(pollGamepads());
+    var gp = gamepads[0];
     pauseHandled = (gamepadConnected && !gp.buttons[9].pressed) ? false : pauseHandled;
     if ((!keylog[13].handled && keylog[13].pressed) || (gamepadConnected && gp.buttons[9].pressed && !pauseHandled)) {
       pause = !pause;
@@ -60,6 +61,8 @@ var Game = function (second, pvp) {
       canvas.context.globalAlpha = 0.2;
       canvas.context.fillStyle = 'gray';
       canvas.context.fillRect(42, 42, 416, 416);
+    } else {
+      canvas.context.globalAlpha = 1;
     }
 
     if (elapsed > fpsInterval && !pause) { //checking fps
@@ -181,7 +184,12 @@ var Game = function (second, pvp) {
 
   /*Update and draw player 1 and 2 also initiate player bullet if fired*/
   playerUpdates = function (player, playerNumber) {
-    gp = pollGamepads()
+    var gamepads = checkXBOX(pollGamepads());
+    if (playerNumber === 1) var gp = gamepads[0];
+    else {
+      if (gamepads.length > 1) var gp = gamepads[1];
+      else var gp = null;
+    }
     player.updateTank(map, enemy, gp);
     player.drawTank();
     if (player !== null && player.checkBulletFired(gp)) {
@@ -236,6 +244,7 @@ var Game = function (second, pvp) {
       playerTank = null;
       playerNumber == 1 ? player = null : player2 = null;
       playerNumber == 1 ? player1Lives-- : player2Lives--;
+      sound.explosionBase.play();
     }
     plBullet = playerNumber == 1 ? playerBullet : player2Bullet;
     if (playerTank !== null && plBullet !== null) {
@@ -271,10 +280,23 @@ var Game = function (second, pvp) {
         var tank = playerNum === 1 ? player2 : player;
         if (tank != null && plBullet.tankDetection(tank)) {
           sound.explosionTank.play();
+          playerNum === 1 ? player2Bullet = null : playerBullet = null;
           playerNum === 1 ? player1Score += 500 : player2Score += 500;
           playerNum === 2 ? player = null : player2 = null;
           playerNum === 2 ? player1Lives-- : player2Lives--;
         }
+        secondBullet = playerNum == 1 ? player2Bullet : playerBullet;
+        if (plBullet && secondBullet) {
+          if (plBullet.bulletBulletCollision(secondBullet.bulletPosition)) {
+            plBullet = null;
+            player.bulletFired = false;
+            player2.bulletFired = false;
+            playerBullet = null;
+            player2Bullet = null;
+          }
+
+        }
+
       }
     }
   }
@@ -344,7 +366,7 @@ var Game = function (second, pvp) {
       if (secondPlayer) canvas.context.fillText('P2 SCORE: ' + player2Score, 150, 300);
       if (winnerBase) canvas.context.fillText('PLAYER ' + winnerBase + " WON!!(DESTROYED BASE)", 100, 350);
       else if ((player1Lives < 0 || player2Lives < 0) && (player1Lives !== player2Lives)) {
-        var winner = player1lives > player2Lives ? '1' : '2';
+        var winner = player1Lives > player2Lives ? '1' : '2';
         canvas.context.fillText('PLAYER ' + winner + " WON!!(OPPONENT NO LIVES LEFT)", 100, 350);
       } else {
         var winner = player1Score > player2Score ? '1' : '2';

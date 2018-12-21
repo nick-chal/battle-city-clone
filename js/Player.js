@@ -30,7 +30,10 @@ var Player = function () {
 
   /*check if ready to create new bullet */
   this.checkBulletFired = function (gamepad) {
-    if ((!gamepadConnected && (keylog[32].pressed && !keylog[32].handled && this.bulletFired == false)) || (gamepadConnected && gamepad.buttons[0].pressed && this.bulletFired == false)) {
+    var gamepadButtonPressed = false;
+    if (gamepadConnected && (gamepad.buttons[0].pressed || gamepad.buttons[1].pressed || gamepad.buttons[2].pressed || gamepad.buttons[3].pressed))
+      gamepadButtonPressed = true;
+    if ((!gamepadConnected && (keylog[32].pressed && !keylog[32].handled && this.bulletFired == false)) || (gamepadButtonPressed && this.bulletFired == false)) {
       this.bulletFired = true;
       if (!gamepadConnected) keylog[32].handled = true;
       return true;

@@ -35,7 +35,8 @@ var Editor = function () {
     var stop = false;
     now = Date.now();
     elapsed = now - then;
-    var gamepad = pollGamepads();
+    var gamepads = checkXBOX(pollGamepads());
+    var gamepad = gamepads[0];
     if (elapsed > fpsInterval) {
       clearMap();
       drawMap(map);
