@@ -31,9 +31,9 @@ var Player2 = function (pvp) {
 
   this.checkBulletFired = function (gamepad) {
     var gamepadButtonPressed = false;
-    if (gamepad != null && (gamepad.buttons[0].pressed || gamepad.buttons[1].pressed || gamepad.buttons[2].pressed || gamepad.buttons[3].pressed))
+    if (gamepad && (gamepad.buttons[0].pressed || gamepad.buttons[1].pressed || gamepad.buttons[2].pressed || gamepad.buttons[3].pressed))
       gamepadButtonPressed = true;
-    if ((!gamepad && (keylog[32].pressed && !keylog[32].handled && this.bulletFired == false)) || (gamepadButtonPressed && this.bulletFired == false)) {
+    if ((!gamepad && (keylog[70].pressed && !keylog[70].handled && this.bulletFired == false)) || (gamepadButtonPressed && this.bulletFired == false)) {
       this.bulletFired = true;
       keylog[16].handled = true;
       return true;

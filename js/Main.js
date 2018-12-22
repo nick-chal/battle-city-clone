@@ -36,8 +36,10 @@ var homekey = new Sprite('assets/images/home_key.png', 250, 140);
 var gamepadHome = new Sprite('assets/images/gamepad_home.png', 250, 140);
 var gamepadEditor = new Sprite('assets/images/editor_gamepad_map.png', 250, 140);
 var p1GamepadKey = new Sprite('assets/images/game_gamepad_key.png', 250, 140);
+var p2GamepadKey = new Sprite('assets/images/game_gamepad_key2.png', 250, 140);
 var p1Keymap = new Sprite('assets/images/game_keyboard_key.png', 250, 140);
 var p2Keymap = new Sprite('assets/images/game_p2_key.png', 250, 140);
+var exit = new Sprite('assets/images/exit_key.png', 100, 50);
 var keyEditor = new Sprite('assets/images/editor_key_map.png', 250, 140);
 var mapType = new Sprite('assets/images/editor_active.png', 32, 220)
 var brick = new Sprite('assets/images/wall_brick.png', 16, 16);
@@ -123,22 +125,22 @@ document.addEventListener('DOMContentLoaded', function () {
 })
 
 /*Check gamepad is connected or not */
-window.addEventListener("gamepaddisconnected", function () {
-  var gp = pollGamepads();
-  if (gp.length <= 0) gamepadConnected = false;
-  console.log('gpdisconn');
-});
+// window.addEventListener("gamepaddisconnected", function () {
+//   var gp = pollGamepads();
+//   if (gp.length <= 0) gamepadConnected = false;
+//   console.log('gpdisconn');
+// });
 
-window.addEventListener("gamepadconnected", function () {
-  var gp = pollGamepads();
-  if (gp.length > 0) gamepadConnected = true;
-  console.log('gpconn');
-});
+// window.addEventListener("gamepadconnected", function () {
+//   var gp = pollGamepads();
+//   if (gp.length > 0) gamepadConnected = true;
+//   console.log('gpconn');
+// });
 
 checkXBOX = function (gp) {
   var temp;
   for (var i = 0; i < gp.length; i++) {
-    if (gp[i].id === "Xbox 360 Controller (XInput STANDARD GAMEPAD)" && i !== 0) {
+    if ((gp[i].id === "Xbox 360 Controller (XInput STANDARD GAMEPAD)" || gp[i].id === "xinput") && i !== 0) {
       temp = gp[0];
       gp[0] = gp[i];
       gp[i] = temp;
@@ -184,11 +186,12 @@ var landingView = function (tankPosition) {
   var stop = false;
   var gamepads = checkXBOX(pollGamepads());
   var gp = gamepads[0];
-  if (gamepadConnected) {
+  var gamepad = gp;
+  if (gp) {
     if (gp.axes[1] < 0.1 && gp.axes[1] > -0.1) gamepadHandled = false;
   }
   var gamepadButtonPressed = false;
-  if (gamepadConnected && (gp.buttons[0].pressed || gp.buttons[1].pressed || gp.buttons[2].pressed || gp.buttons[3].pressed))
+  if (gamepad && (gp.buttons[0].pressed || gp.buttons[1].pressed || gp.buttons[2].pressed || gp.buttons[3].pressed))
     gamepadButtonPressed = true;
   now = Date.now();
   elapsed = now - then;
@@ -198,21 +201,21 @@ var landingView = function (tankPosition) {
     canvas.context.clearRect(0, 450, 550, 600);
     homekey.draw(25, 450);
 
-    if (gamepadConnected) gamepadHome.draw(300, 450);
+    if (gamepad) gamepadHome.draw(300, 450);
 
     then = now - (elapsed % fpsInterval);
 
     //move selection down
-    if (((!keylog[38].handled && keylog[38].pressed) || (gamepadConnected && gp.axes[1] < -.99 && !gamepadHandled)) && tankPosition != 250) {
+    if (((!keylog[38].handled && keylog[38].pressed) || (gamepad && gp.axes[1] < -.99 && !gamepadHandled)) && tankPosition != 250) {
       tankPosition -= 50;
-      gamepadConnected ? gamepadHandled = true : null;
+      gamepad ? gamepadHandled = true : null;
       keylog[38].handled = true;
     }
 
     //move selection up
-    if (((!keylog[40].handled && keylog[40].pressed) || (gamepadConnected && gp.axes[1] > .99 && !gamepadHandled)) && tankPosition != 400) {
+    if (((!keylog[40].handled && keylog[40].pressed) || (gamepad && gp.axes[1] > .99 && !gamepadHandled)) && tankPosition != 400) {
       tankPosition += 50;
-      gamepadConnected ? gamepadHandled = true : null;
+      gamepad ? gamepadHandled = true : null;
       keylog[40].handled = true;
     }
 

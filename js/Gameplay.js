@@ -50,11 +50,14 @@ var Game = function (second, pvp) {
     now = Date.now();
     var gamepads = checkXBOX(pollGamepads());
     var gp = gamepads[0];
-    pauseHandled = (gamepadConnected && !gp.buttons[9].pressed) ? false : pauseHandled;
-    if ((!keylog[13].handled && keylog[13].pressed) || (gamepadConnected && gp.buttons[9].pressed && !pauseHandled)) {
+    pauseHandled = (gp && !gp.buttons[9].pressed) ? false : pauseHandled;
+    if ((!keylog[13].handled && keylog[13].pressed) || (gp && gp.buttons[9].pressed && !pauseHandled)) {
       pause = !pause;
       pauseHandled = true;
       keylog[13].handled = true;
+    }
+    if ((!keylog[27].handled && keylog[27].pressed)) {
+      stop = true;
     }
     elapsed = now - then;
     if (gameoverCounter) {
@@ -83,7 +86,7 @@ var Game = function (second, pvp) {
 
       clearMap();
       drawInfo();
-      keyMapping();
+      keyMapping(gamepads);
 
       if (player === null && player1Lives >= 0) player = new Player(); //create player after killed
       if (secondPlayer && player2 === null && player2Lives >= 0) player2 = new Player2(pvp);
@@ -347,10 +350,14 @@ var Game = function (second, pvp) {
   }
 
   /* Drawing the controls instruction*/
-  keyMapping = function () {
-    if (gamepadConnected) p1GamepadKey.draw(43, 480);
-    else p1Keymap.draw(43, 480);
-    if (secondPlayer) p2Keymap.draw(320, 480);
+  keyMapping = function (gamepads) {
+    exit.draw(320, 465);
+    if (gamepads.length > 1) p2GamepadKey.draw(43, 480);
+    else {
+      if (gamepads[0]) p1GamepadKey.draw(43, 480);
+      else p1Keymap.draw(43, 480);
+      if (secondPlayer) p2Keymap.draw(320, 480);
+    }
   }
 
   /*Drawing GameOver Text with scores and winner */
