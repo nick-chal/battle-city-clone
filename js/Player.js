@@ -1,9 +1,58 @@
-var Player = function () {
+var Player = function (plNum, pvp) {
   this.direction = 'up'; //initital facing
-  this.tankPosition = [8 * 16, 24 * 16]; //creation position
   this.bulletFired = false;
-  // var that = this;
+  this.fireKey = false;
+  this.upKey = false;
+  this.downKey = false;
+  this.leftKey = false;
+  this.rightKey = false;
   this.startAnimationCounter = 0; //creation time animation
+  this.playerNumber = plNum;
+  if (this.playerNumber === 1) {
+    this.tankPosition = [8 * 16, 24 * 16]; //creation position
+  } else {
+    this.tankPosition = pvp ? [16 * 16, 0 * 16] : [16 * 16, 24 * 16];
+    if (pvp) this.direction = 'down';
+  }
+
+
+  this.keyCheck = function (gamepad) {
+    var gamepadButtonPressed = false;
+    if (this.playerNumber === 1) {
+      if (gamepad && (gamepad.buttons[0].pressed || gamepad.buttons[1].pressed || gamepad.buttons[2].pressed || gamepad.buttons[3].pressed))
+        gamepadButtonPressed = true;
+      if ((!gamepad && (keylog[32].pressed && !keylog[32].handled && this.bulletFired == false)) || (gamepadButtonPressed && this.bulletFired == false)) {
+        this.fireKey = true;
+        if (!gamepad) keylog[32].handled = true;
+      }
+      if ((!gamepad && (!keylog[38].handled && keylog[38].pressed)) || (gamepad && (gamepad.axes[1] < -.99))) {
+        this.upKey = true;
+      } else if ((!gamepad && (!keylog[40].handled && keylog[40].pressed)) || (gamepad && (gamepad.axes[1] > .99))) {
+        this.downKey = true;
+      } else if ((!gamepad && (!keylog[39].handled && keylog[39].pressed)) || (gamepad && (gamepad.axes[0] > .99))) {
+        this.rightKey = true;
+      } else if ((!gamepad && (!keylog[37].handled && keylog[37].pressed)) || (gamepad && (gamepad.axes[0] < -.99))) {
+        this.leftKey = true;
+      }
+    } else {
+      if (gamepad && (gamepad.buttons[0].pressed || gamepad.buttons[1].pressed || gamepad.buttons[2].pressed || gamepad.buttons[3].pressed))
+        gamepadButtonPressed = true;
+      if ((!gamepad && (keylog[70].pressed && !keylog[70].handled && this.bulletFired == false)) || (gamepadButtonPressed && this.bulletFired == false)) {
+        this.fireKey = true;
+        if (!gamepad) keylog[70].handled = true;
+      }
+      if ((!gamepad && (!keylog[87].handled && keylog[87].pressed)) || (gamepad && (gamepad.axes[1] < -.99))) {
+        this.upKey = true;
+      } else if ((!gamepad && (!keylog[83].handled && keylog[83].pressed)) || (gamepad && (gamepad.axes[1] > .99))) {
+        this.downKey = true;
+      } else if ((!gamepad && (!keylog[68].handled && keylog[68].pressed)) || (gamepad && (gamepad.axes[0] > .99))) {
+        this.rightKey = true;
+      } else if ((!gamepad && (!keylog[65].handled && keylog[65].pressed)) || (gamepad && (gamepad.axes[0] < -.99))) {
+        this.leftKey = true;
+      }
+    }
+
+  }
 
   this.drawTank = function () {
     var currTankImage = null;
@@ -30,12 +79,10 @@ var Player = function () {
 
   /*check if ready to create new bullet */
   this.checkBulletFired = function (gamepad) {
-    var gamepadButtonPressed = false;
-    if (gamepad && (gamepad.buttons[0].pressed || gamepad.buttons[1].pressed || gamepad.buttons[2].pressed || gamepad.buttons[3].pressed))
-      gamepadButtonPressed = true;
-    if ((!gamepad && (keylog[32].pressed && !keylog[32].handled && this.bulletFired == false)) || (gamepadButtonPressed && this.bulletFired == false)) {
+    this.keyCheck(gamepad);
+    if (this.fireKey) {
       this.bulletFired = true;
-      if (!gamepad) keylog[32].handled = true;
+      this.fireKey = false;
       return true;
     }
     return false;
@@ -47,6 +94,7 @@ var Player = function () {
     var wallCheck2 = [];
     var tankCollision = false;
     var tankCollision = false;
+    this.keyCheck(gamepad);
     if (this.startAnimationCounter < 120) {
       this.startAnimationCounter++;
       this.bulletFired = true;
@@ -58,7 +106,7 @@ var Player = function () {
         if (tankCollision)
           break;
       }
-      if ((!gamepad && (!keylog[38].handled && keylog[38].pressed)) || (gamepad && (gamepad.axes[1] < -.99))) {
+      if (this.upKey) {
         if (tankCollision && this.direction == 'up') return;
         if (this.direction == 'right' || this.direction == 'left') {
           this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
@@ -70,8 +118,9 @@ var Player = function () {
           this.tankPosition[1] -= 2;
         }
         this.direction = 'up';
+        this.upKey = false;
 
-      } else if ((!gamepad && (!keylog[40].handled && keylog[40].pressed)) || (gamepad && (gamepad.axes[1] > .99))) {
+      } else if (this.downKey) {
         if (tankCollision && this.direction == 'down') return;
         if (this.direction == 'right' || this.direction == 'left') {
           this.tankPosition[0] = ((this.tankPosition[0]) % 16 < 8) ? Math.floor(this.tankPosition[0] / 16) * 16 : Math.ceil(this.tankPosition[0] / 16) * 16;
@@ -83,8 +132,9 @@ var Player = function () {
           this.tankPosition[1] += 2;
         }
         this.direction = 'down';
+        this.downKey = false;
 
-      } else if ((!gamepad && (!keylog[39].handled && keylog[39].pressed)) || (gamepad && (gamepad.axes[0] > .99))) {
+      } else if (this.rightKey) {
         if (tankCollision && this.direction == 'right') return;
         if (this.direction == 'up' || this.direction == 'down') {
           this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
@@ -96,8 +146,9 @@ var Player = function () {
           this.tankPosition[0] += 2;
         }
         this.direction = 'right';
+        this.rightKey = false;
 
-      } else if ((!gamepad && (!keylog[37].handled && keylog[37].pressed)) || (gamepad && (gamepad.axes[0] < -.99))) {
+      } else if (this.leftKey) {
         if (tankCollision && this.direction == 'left') return;
         if (this.direction == 'up' || this.direction == 'down') {
           this.tankPosition[1] = ((this.tankPosition[1]) % 16 < 8) ? Math.floor(this.tankPosition[1] / 16) * 16 : Math.ceil(this.tankPosition[1] / 16) * 16;
@@ -108,6 +159,7 @@ var Player = function () {
           this.tankPosition[0] -= 2;
         }
         this.direction = 'left';
+        this.leftKey = false;
       }
     }
 

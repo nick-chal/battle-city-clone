@@ -88,8 +88,8 @@ var Game = function (second, pvp) {
       drawInfo();
       keyMapping(gamepads);
 
-      if (player === null && player1Lives >= 0) player = new Player(); //create player after killed
-      if (secondPlayer && player2 === null && player2Lives >= 0) player2 = new Player2(pvp);
+      if (player === null && player1Lives >= 0) player = new Player(1, pvp); //create player after killed
+      if (secondPlayer && player2 === null && player2Lives >= 0) player2 = new Player(2, pvp);
       if (player !== null) playerUpdates(player, 1);
       if (secondPlayer && player2 !== null) playerUpdates(player2, 2);
 
