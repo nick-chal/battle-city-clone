@@ -49,19 +49,22 @@ var water = new Sprite('assets/images/water1.png', 16, 16);
 var base = new Sprite('assets/images/base.png', 32, 32);
 var baseDestroyed = new Sprite('assets/images/base_destroyed.png', 32, 32)
 var tankEditor = new Sprite('assets/images/tank_player1_editor.png', 32, 32);
-var tankRight = new Sprite('assets/images/tank_right.png', 32, 32);
-var tankLeft = new Sprite('assets/images/tank_left.png', 32, 32);
-var tankDown = new Sprite('assets/images/tank_down.png', 32, 32);
-var tankUp = new Sprite('assets/images/tank_up.png', 32, 32);
 
-var enemyIcon = new Sprite('assets/images/enemy.png', 16, 16);
-var tank2Right = new Sprite('assets/images/tank_player2_right.png', 32, 32);
-var tank2Left = new Sprite('assets/images/tank_player2_left.png', 32, 32);
-var tank2Down = new Sprite('assets/images/tank_player2_down.png', 32, 32);
-var tank2Up = new Sprite('assets/images/tank_player2_up.png', 32, 32);
+var tankSprite = {
+  tankRight1: new Sprite('assets/images/tank_right.png', 32, 32),
+  tankLeft1: new Sprite('assets/images/tank_left.png', 32, 32),
+  tankDown1: new Sprite('assets/images/tank_down.png', 32, 32),
+  tankUp1: new Sprite('assets/images/tank_up.png', 32, 32),
+
+  tankRight2: new Sprite('assets/images/tank_player2_right.png', 32, 32),
+  tankLeft2: new Sprite('assets/images/tank_player2_left.png', 32, 32),
+  tankDown2: new Sprite('assets/images/tank_player2_down.png', 32, 32),
+  tankUp2: new Sprite('assets/images/tank_player2_up.png', 32, 32)
+}
 
 var creation = new Sprite('assets/images/create_sprite.png', 32, 32);
 
+var enemyIcon = new Sprite('assets/images/enemy.png', 16, 16);
 var enemySprite = {
   enemyUp1: new Sprite('assets/images/enemy_up_1.png', 32, 32),
   enemyDown1: new Sprite('assets/images/enemy_down_1.png', 32, 32),
@@ -219,7 +222,7 @@ var landingView = function (tankPosition) {
       keylog[40].handled = true;
     }
 
-    tankRight.drawAnimated(135, tankPosition - 16, [0, 1]);
+    tankSprite.tankRight1.drawAnimated(135, tankPosition - 16, [0, 1]);
 
     /*Check which option is selected when enter is pressed */
     if ((keylog[13].pressed && !keylog[13].handled) || (gamepadButtonPressed)) {

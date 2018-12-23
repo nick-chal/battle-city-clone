@@ -61,16 +61,16 @@ var Player = function (plNum, pvp) {
     } else {
       switch (this.direction) { //select tank direction sprite
         case 'up':
-          currTankImage = tankUp;
+          currTankImage = tankSprite['tankUp' + this.playerNumber];
           break;
         case 'down':
-          currTankImage = tankDown;
+          currTankImage = tankSprite['tankDown' + this.playerNumber];
           break;
         case 'right':
-          currTankImage = tankRight;
+          currTankImage = tankSprite['tankRight' + this.playerNumber];
           break;
         case 'left':
-          currTankImage = tankLeft;
+          currTankImage = tankSprite['tankLeft' + this.playerNumber];
           break;
       }
       currTankImage.drawAnimated(this.tankPosition[0] + PADD, this.tankPosition[1] + PADD, [0, 1]);
@@ -80,7 +80,7 @@ var Player = function (plNum, pvp) {
   /*check if ready to create new bullet */
   this.checkBulletFired = function (gamepad) {
     this.keyCheck(gamepad);
-    if (this.fireKey) {
+    if (this.fireKey && this.startAnimationCounter >= 120) {
       this.bulletFired = true;
       this.fireKey = false;
       return true;
