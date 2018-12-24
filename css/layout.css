@@ -15,6 +15,6 @@ body {
 
 div {
   margin: 5px auto;
-  width: 500px;
+  /* width: 500px; */
   font-family: prstart;
 }

@@ -1,5 +1,8 @@
 var Game = function (second, pvp) {
-  var map
+  var map;
+  var pvp = pvp;
+  var stage;
+
   var player = null;
   var player2 = null;
   var secondPlayer = second;
@@ -7,39 +10,46 @@ var Game = function (second, pvp) {
   var player2Lives = secondPlayer ? 2 : -1; //setting initial lives
   var player1Score = 0;
   var player2Score = 0;
-  var enemy = [];
-  var enemyBullet;
   var playerBullet;
   var player2Bullet;
+
+  var enemy = [];
+  var enemyBullet;
   var enemyLimit;
   var enemyLeft;
-  var enemyCounter;
   var enemyLives;
+  var enemyCounter;
+  var maxEnemyScreen = 4; //max enemy at once
+
   var pause;
   var pauseHandled
+
   var gameoverCounter = null;
-  var maxEnemyScreen = 4; //max enemy at once
-  var pvp = pvp;
-  var stage;
-  var winnerBase = null;
+
   var pvpGO = false; //doesnt let scoreboard change after gameover
+  var winnerBase = null; //flag to chekc which base is destroyed
 
   this.init = function (mapLoad, stageNum = 1) {
     map = mapLoad;
+
     enemy = [];
     enemyBullet = [];
-    playerBullet = null;
-    player2Bullet = null;
     enemyLimit = 18;
     enemyKilled = 0;
     enemyCounter = 0;
     enemyLives = 0;
     enemyLeft = enemyLimit;
+
+    playerBullet = null;
+    player2Bullet = null;
+
     stage = stageNum;
+
     gameoverCounter = 0;
     then = Date.now();
     startTime = then;
     sound.start.play();
+
     requestAnimationFrame(function () {
       runGame();
     })
@@ -48,9 +58,12 @@ var Game = function (second, pvp) {
   var runGame = function () {
     var stop = false;
     now = Date.now();
+    elapsed = now - then;
     var gamepads = checkXBOX(pollGamepads());
     var gp = gamepads[0];
+
     pauseHandled = (gp && !gp.buttons[9].pressed) ? false : pauseHandled;
+
     if ((!keylog[13].handled && keylog[13].pressed) || (gp && gp.buttons[9].pressed && !pauseHandled)) {
       pause = !pause;
       pauseHandled = true;
@@ -59,11 +72,11 @@ var Game = function (second, pvp) {
     if ((!keylog[27].handled && keylog[27].pressed)) {
       stop = true;
     }
-    elapsed = now - then;
+
     if (gameoverCounter) {
       canvas.context.globalAlpha = 0.2;
       canvas.context.fillStyle = 'gray';
-      canvas.context.fillRect(42, 42, 416, 416);
+      canvas.context.fillRect(PADD, PADD, 416, 416);
     } else {
       canvas.context.globalAlpha = 1;
     }
@@ -181,7 +194,7 @@ var Game = function (second, pvp) {
       canvas.context.clearRect(0, 0, 550, 620);
       gameOver.draw(116, 200);
       sound.over.play();
-      setTimeout(initAll, 2500);
+      setTimeout(new Main().initAll, 2500);
     }
   }
 
@@ -324,13 +337,13 @@ var Game = function (second, pvp) {
     canvas.context.font = '10px prstart';
     canvas.context.fillStyle = 'black';
     canvas.context.textBaseline = 'top';
-    canvas.context.fillText('LIVES: ' + (player1Lives >= 0 ? player1Lives : 'X'), 30 + 42, 10);
-    canvas.context.fillText('SCORE: ' + player1Score, 30 + 42, 30);
+    canvas.context.fillText('LIVES: ' + (player1Lives >= 0 ? player1Lives : 'X'), (30 + 42), 10);
+    canvas.context.fillText('SCORE: ' + player1Score, (30 + 42), 30);
     canvas.context.fillText('ENEMIES', 470, 45);
 
     if (secondPlayer) {
-      canvas.context.fillText('LIVES: ' + (player2Lives >= 0 ? player2Lives : 'X'), 348 + 30, 10);
-      canvas.context.fillText('SCORE: ' + player2Score, 348 + 30, 30);
+      canvas.context.fillText('LIVES: ' + (player2Lives >= 0 ? player2Lives : 'X'), (348 + 30), 10);
+      canvas.context.fillText('SCORE: ' + player2Score, (348 + 30), 30);
     }
     canvas.context.font = '13px prstart';
     canvas.context.fillText('STAGE:' + stage, 210, 20);
@@ -392,5 +405,4 @@ var Game = function (second, pvp) {
     }
     return false;
   }
-
 }

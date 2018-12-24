@@ -1,7 +1,8 @@
 var Bullet = function (direction, position, owner) {
+
+  var owner = owner;
   this.direction = direction;
   this.bulletPosition = position;
-  var owner = owner;
 
   /*Check the owner is enemy or player */
   switch (owner) {
@@ -12,6 +13,7 @@ var Bullet = function (direction, position, owner) {
       this.speed = 3;
       break;
   }
+
   this.destroyed = false;
 
   var currBulletImage = null;
@@ -91,11 +93,14 @@ var Bullet = function (direction, position, owner) {
 
   /*update bullet position and check collision */
   this.updateBullet = function (map) {
+    var wallCheck1 = [];
+    var wallCheck2 = [];
+
     switch (this.direction) {
       case 'up':
+        wallCheck1 = [(Math.floor(this.bulletPosition[0] / 16)), (Math.floor(this.bulletPosition[1] / 16))];
+        wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
         if (this.bulletPosition[1] >= 0) {
-          wallCheck1 = [(Math.floor(this.bulletPosition[0] / 16)), (Math.floor(this.bulletPosition[1] / 16))];
-          wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
           if (!this.collisionDetection(map, wallCheck1, wallCheck2)) {
             this.bulletPosition[1] -= this.speed;
           } else {
@@ -109,10 +114,11 @@ var Bullet = function (direction, position, owner) {
           this.destroyed = true;
         }
         break;
+
       case 'down':
+        wallCheck1 = [(Math.floor(this.bulletPosition[0] / 16)), (Math.ceil(this.bulletPosition[1] / 16))];
+        wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
         if (this.bulletPosition[1] <= (24 * 16) + 16) {
-          wallCheck1 = [(Math.floor(this.bulletPosition[0] / 16)), (Math.ceil(this.bulletPosition[1] / 16))];
-          wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
           if (!this.collisionDetection(map, wallCheck1, wallCheck2)) {
             this.bulletPosition[1] += this.speed;
           } else {
@@ -126,10 +132,11 @@ var Bullet = function (direction, position, owner) {
           this.destroyed = true;
         }
         break;
+
       case 'right':
+        wallCheck1 = [(Math.floor(this.bulletPosition[0] / 16) + 2), (Math.floor(this.bulletPosition[1] / 16))];
+        wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
         if (this.bulletPosition[0] <= (24 * 16)) {
-          wallCheck1 = [(Math.floor(this.bulletPosition[0] / 16) + 2), (Math.floor(this.bulletPosition[1] / 16))];
-          wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
           if (!this.collisionDetection(map, wallCheck1, wallCheck2)) {
             this.bulletPosition[0] += this.speed;
           } else {
@@ -143,10 +150,11 @@ var Bullet = function (direction, position, owner) {
           this.destroyed = true;
         }
         break;
+
       case 'left':
+        wallCheck1 = [(Math.floor(this.bulletPosition[0] / 16)), (Math.floor(this.bulletPosition[1] / 16))];
+        wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
         if (this.bulletPosition[0] >= 0) {
-          wallCheck1 = [(Math.floor(this.bulletPosition[0] / 16)), (Math.floor(this.bulletPosition[1] / 16))];
-          wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];
           if (!this.collisionDetection(map, wallCheck1, wallCheck2)) {
             this.bulletPosition[0] -= this.speed;
           } else {

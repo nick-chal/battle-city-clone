@@ -1,6 +1,8 @@
 var Enemy = function (pvp) {
   this.tankDestroyed = false;
   this.bulletFired = true;
+  this.startAnimationCounter = 0;
+
   var temp = randomGenerator(0, 10);
   if (temp < 7) {
     var fireLimit = 20;
@@ -18,9 +20,8 @@ var Enemy = function (pvp) {
     this.life = 1;
     this.tankSpeed = 1.75;
   }
+
   var fireRate = 0;
-  this.startAnimationCounter = 0;
-  var ok = false;
 
   var generationSpot = pvp ? randomGenerator(1, 2) : randomGenerator(1, 3);
   switch (generationSpot) {
@@ -35,19 +36,12 @@ var Enemy = function (pvp) {
       break;
   }
 
-  if (pvp) {
-    if (this.tankPosition[0] == 0) {
-      this.direction = 'up';
-      this.change = 'up';
-    } else {
-      this.direction = 'down';
-      this.change = 'down';
-    }
+  if (pvp && this.tankPosition[0] === 0) {
+    this.direction = 'up';
+    this.change = 'up';
   } else {
-    {
-      this.direction = 'down';
-      this.change = 'down';
-    }
+    this.direction = 'down';
+    this.change = 'down';
   }
 
   this.allEnemyCheck = function (enemyList, index, player) {
@@ -90,7 +84,7 @@ var Enemy = function (pvp) {
   }
 
   this.checkBulletFired = function () {
-    if (this.bulletFired == false && fireRate % 20 == 0) {
+    if (this.bulletFired == false && fireRate % fireLimit == 0) {
       this.bulletFired = true;
       fireRate = 1;
       return true;
@@ -153,6 +147,7 @@ var Enemy = function (pvp) {
           }
         }
         if (!tankCollision) this.direction = 'up';
+
       } else if (this.change == 'down') {
         wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16) + 2)];
         wallCheck2 = [wallCheck1[0] + 1, wallCheck1[1]];
@@ -248,6 +243,7 @@ var Enemy = function (pvp) {
           }
         }
         if (!tankCollision) this.direction = 'right';
+
       } else if (this.change == 'left') {
         wallCheck1 = [(Math.floor(this.tankPosition[0] / 16)), (Math.floor(this.tankPosition[1] / 16))];
         wallCheck2 = [wallCheck1[0], wallCheck1[1] + 1];

@@ -1,13 +1,18 @@
 var Player = function (plNum, pvp) {
+
   this.direction = 'up'; //initital facing
   this.bulletFired = false;
+
   this.fireKey = false;
   this.upKey = false;
   this.downKey = false;
   this.leftKey = false;
   this.rightKey = false;
+
   this.startAnimationCounter = 0; //creation time animation
+
   this.playerNumber = plNum;
+
   if (this.playerNumber === 1) {
     this.tankPosition = [8 * 16, 24 * 16]; //creation position
   } else {
